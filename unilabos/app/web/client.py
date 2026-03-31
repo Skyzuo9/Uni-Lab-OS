@@ -3,10 +3,12 @@ HTTP客户端模块
 
 提供与远程服务器通信的客户端功能，只有host需要用
 """
-
+import gzip
 import json
 import os
 from typing import List, Dict, Any, Optional
+
+from unilabos.utils.tools import fast_dumps as _fast_dumps, fast_dumps_pretty as _fast_dumps_pretty
 
 import requests
 from unilabos.resources.resource_tracker import ResourceTreeSet
@@ -74,7 +76,8 @@ class HTTPClient:
             Dict[str, str]: 旧UUID到新UUID的映射关系 {old_uuid: new_uuid}
         """
         with open(os.path.join(BasicConfig.working_dir, "req_resource_tree_add.json"), "w", encoding="utf-8") as f:
-            f.write(json.dumps({"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid}, indent=4))
+            payload = {"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid}
+            f.write(json.dumps(payload, indent=4))
         # 从序列化数据中提取所有节点的UUID（保存旧UUID）
         old_uuids = {n.res_content.uuid: n for n in resources.all_nodes}
         if not self.initialized or first_add:
@@ -279,22 +282,54 @@ class HTTPClient:
             )
         return response
 
-    def resource_registry(self, registry_data: Dict[str, Any] | List[Dict[str, Any]]) -> requests.Response:
+    def resource_registry(
+        self, registry_data: Dict[str, Any] | List[Dict[str, Any]], tag: str = "registry",
+    ) -> requests.Response:
         """
-        注册资源到服务器
+        注册资源到服务器，同步保存请求/响应到 unilabos_data
 
         Args:
             registry_data: 注册表数据，格式为 {resource_id: resource_info} / [{resource_info}]
+            tag: 保存文件的标签后缀 (如 "device_registry" / "resource_registry")
 
         Returns:
             Response: API响应对象
         """
+        # 序列化一次，同时用于保存和发送
+        json_bytes = _fast_dumps(registry_data)
+
+        # 保存请求数据到 unilabos_data
+        req_path = os.path.join(BasicConfig.working_dir, f"req_{tag}_upload.json")
+        try:
+            os.makedirs(BasicConfig.working_dir, exist_ok=True)
+            with open(req_path, "wb") as f:
+                f.write(_fast_dumps_pretty(registry_data))
+            logger.trace(f"注册表请求数据已保存: {req_path}")
+        except Exception as e:
+            logger.warning(f"保存注册表请求数据失败: {e}")
+
+        compressed_body = gzip.compress(json_bytes)
+        headers = {
+            "Authorization": f"Lab {self.auth}",
+            "Content-Type": "application/json",
+            "Content-Encoding": "gzip",
+        }
         response = requests.post(
             f"{self.remote_addr}/lab/resource",
-            json=registry_data,
-            headers={"Authorization": f"Lab {self.auth}"},
+            data=compressed_body,
+            headers=headers,
             timeout=30,
         )
+
+        # 保存响应数据到 unilabos_data
+        res_path = os.path.join(BasicConfig.working_dir, f"res_{tag}_upload.json")
+        try:
+            with open(res_path, "w", encoding="utf-8") as f:
+                f.write(f"{response.status_code}\n{response.text}")
+            logger.trace(f"注册表响应数据已保存: {res_path}")
+        except Exception as e:
+            logger.warning(f"保存注册表响应数据失败: {e}")
+
         if response.status_code not in [200, 201]:
             logger.error(f"注册资源失败: {response.status_code}, {response.text}")
         if response.status_code == 200:
@@ -332,6 +367,106 @@ class HTTPClient:
                 logger.error(f"解析启动配置JSON失败: {str(e.args)}\n响应内容: {response.text}")
                 logger.error(f"响应内容: {response.text}")
         return None
+
+    def workflow_import(
+        self,
+        name: str,
+        workflow_uuid: str,
+        workflow_name: str,
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        tags: Optional[List[str]] = None,
+        published: bool = False,
+        description: str = "",
+    ) -> Dict[str, Any]:
+        """
+        导入工作流到服务器，如果 published 为 True，则额外发起发布请求
+
+        Args:
+            name: 工作流名称（顶层）
+            workflow_uuid: 工作流UUID
+            workflow_name: 工作流名称（data内部）
+            nodes: 工作流节点列表
+            edges: 工作流边列表
+            tags: 工作流标签列表，默认为空列表
+            published: 是否发布工作流，默认为False
+            description: 工作流描述，发布时使用
+
+        Returns:
+            Dict: API响应数据，包含 code 和 data (uuid, name)
+        """
+        payload = {
+            "name": name,
+            "data": {
+                "workflow_uuid": workflow_uuid,
+                "workflow_name": workflow_name,
+                "nodes": nodes,
+                "edges": edges,
+                "tags": tags if tags is not None else [],
+            },
+        }
+        # 保存请求到文件
+        with open(os.path.join(BasicConfig.working_dir, "req_workflow_upload.json"), "w", encoding="utf-8") as f:
+            f.write(json.dumps(payload, indent=4, ensure_ascii=False))
+
+        response = requests.post(
+            f"{self.remote_addr}/lab/workflow/owner/import",
+            json=payload,
+            headers={"Authorization": f"Lab {self.auth}"},
+            timeout=60,
+        )
+        # 保存响应到文件
+        with open(os.path.join(BasicConfig.working_dir, "res_workflow_upload.json"), "w", encoding="utf-8") as f:
+            f.write(f"{response.status_code}" + "\n" + response.text)
+
+        if response.status_code == 200:
+            res = response.json()
+            if "code" in res and res["code"] != 0:
+                logger.error(f"导入工作流失败: {response.text}")
+                return res
+            # 导入成功后，如果需要发布则额外发起发布请求
+            if published:
+                imported_uuid = res.get("data", {}).get("uuid", workflow_uuid)
+                publish_res = self.workflow_publish(imported_uuid, description)
+                res["publish_result"] = publish_res
+            return res
+        else:
+            logger.error(f"导入工作流失败: {response.status_code}, {response.text}")
+            return {"code": response.status_code, "message": response.text}
+
+    def workflow_publish(self, workflow_uuid: str, description: str = "") -> Dict[str, Any]:
+        """
+        发布工作流
+
+        Args:
+            workflow_uuid: 工作流UUID
+            description: 工作流描述
+
+        Returns:
+            Dict: API响应数据
+        """
+        payload = {
+            "uuid": workflow_uuid,
+            "description": description,
+            "published": True,
+        }
+        logger.info(f"正在发布工作流: {workflow_uuid}")
+        response = requests.patch(
+            f"{self.remote_addr}/lab/workflow/owner",
+            json=payload,
+            headers={"Authorization": f"Lab {self.auth}"},
+            timeout=60,
+        )
+        if response.status_code == 200:
+            res = response.json()
+            if "code" in res and res["code"] != 0:
+                logger.error(f"发布工作流失败: {response.text}")
+            else:
+                logger.info(f"工作流发布成功: {workflow_uuid}")
+            return res
+        else:
+            logger.error(f"发布工作流失败: {response.status_code}, {response.text}")
+            return {"code": response.status_code, "message": response.text}
 
 
 # 创建默认客户端实例
