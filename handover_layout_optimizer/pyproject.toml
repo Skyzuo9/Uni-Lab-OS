@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "layout-optimizer"
+version = "0.2.0"
+description = "AI laboratory layout optimizer — differential evolution + OBB collision + MoveIt2 IK reachability"
+requires-python = ">=3.9"
+dependencies = [
+    "scipy>=1.10",
+    "numpy>=1.24",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "httpx>=0.24",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["layout_optimizer*"]
+
+[tool.setuptools.package-data]
+layout_optimizer = [
+    "footprints.json",
+    "static/*.html",
+    "demo/*.html",
+    "demo/*.json",
+    "llm_skill/*.md",
+    "tests/fixtures/*.json",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["layout_optimizer/tests"]

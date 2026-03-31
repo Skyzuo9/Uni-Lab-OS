@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: layout-optimizer
+Version: 0.2.0
+Summary: AI laboratory layout optimizer — differential evolution + OBB collision + MoveIt2 IK reachability
+Requires-Python: >=3.9
+Requires-Dist: scipy>=1.10
+Requires-Dist: numpy>=1.24
+Requires-Dist: fastapi>=0.100
+Requires-Dist: uvicorn>=0.20
+Requires-Dist: pydantic>=2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: httpx>=0.24; extra == "dev"

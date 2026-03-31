@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Layout Optimizer — Demo</title>
+<style>
+  :root { --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a; --accent: #6c63ff; --accent2: #00c9a7; --text: #e4e4e7; --muted: #71717a; --danger: #ef4444; --success: #22c55e; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header .badge { font-size: 11px; background: var(--accent); padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+
+  .main { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 65px); }
+
+  .panel { padding: 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+  .panel h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  .input-group { margin-bottom: 20px; }
+  .input-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  textarea { width: 100%; min-height: 100px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-size: 14px; resize: vertical; font-family: inherit; }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  input[type="number"], input[type="text"] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; }
+  input:focus { outline: none; border-color: var(--accent); }
+
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+
+  .device-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 16px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
+  .chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip:hover { border-color: var(--accent); }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: #fff; width: 100%; justify-content: center; }
+  .btn-primary:hover { background: #5b54e6; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pipeline { margin-top: 20px; }
+  .step { padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); background: var(--card); }
+  .step-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .step-dot.active { background: var(--accent); animation: pulse 1s infinite; }
+  .step-dot.done { background: var(--success); }
+  .step-dot.error { background: var(--danger); }
+  .step-body { font-size: 12px; color: var(--muted); max-height: 150px; overflow-y: auto; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .canvas-area { display: flex; flex-direction: column; background: #12141c; }
+  .canvas-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .canvas-header h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stats { display: flex; gap: 16px; font-size: 12px; color: var(--muted); }
+  .stats span { display: flex; align-items: center; gap: 4px; }
+  .stats .val { color: var(--text); font-weight: 600; }
+
+  svg { flex: 1; width: 100%; }
+  .lab-bg { fill: #1e2130; stroke: var(--border); stroke-width: 2; }
+  .device-rect { stroke-width: 1.5; rx: 3; }
+  .device-label { font-size: 11px; fill: var(--text); text-anchor: middle; dominant-baseline: central; font-family: inherit; }
+  .device-direction { stroke: var(--accent2); stroke-width: 2; fill: none; marker-end: url(#arrow); }
+  .grid-line { stroke: #1a1d2a; stroke-width: 0.5; }
+  .dimension-text { font-size: 10px; fill: var(--muted); text-anchor: middle; }
+
+  .examples { margin-top: 8px; }
+  .example { font-size: 12px; color: var(--accent); cursor: pointer; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .example:hover { color: #fff; }
+  .example::before { content: '→ '; }
+
+  .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 100; animation: slideIn 0.3s; }
+  .toast.success { background: #065f46; color: #6ee7b7; }
+  .toast.error { background: #7f1d1d; color: #fca5a5; }
+  @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Lab Layout Optimizer</h1>
+  <span class="badge">DEMO</span>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <h2>1. 自然语言输入</h2>
+    <div class="input-group">
+      <label>描述你的布局需求</label>
+      <textarea id="nlInput" placeholder="例如：把 PCR 仪和离心机放近一点，机械臂要能够到它们"></textarea>
+    </div>
+
+    <div class="examples">
+      <div class="example" onclick="setExample(this)">把 PCR 仪和离心机放近一点，机械臂要能够到它们</div>
+      <div class="example" onclick="setExample(this)">PCR workflow: arm transfers samples between thermocycler, centrifuge, and vortex mixer</div>
+      <div class="example" onclick="setExample(this)">机械臂能够到所有设备，离心机和涡旋混合器放近一点，PCR仪离它们远一点</div>
+    </div>
+
+    <h2 style="margin-top: 24px;">2. 设备与实验室</h2>
+    <div class="input-group">
+      <label>实验室尺寸 (米)</label>
+      <div class="row">
+        <div><input type="number" id="labW" value="4.0" step="0.5" min="1"><label style="font-size:11px;">宽度</label></div>
+        <div><input type="number" id="labD" value="3.0" step="0.5" min="1"><label style="font-size:11px;">深度</label></div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>选择设备（点击选中/取消）</label>
+      <div class="device-chips" id="deviceChips"></div>
+    </div>
+
+    <button class="btn btn-primary" id="runBtn" onclick="runPipeline()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>
+      运行布局优化
+    </button>
+
+    <div class="pipeline" id="pipeline"></div>
+  </div>
+
+  <div class="canvas-area">
+    <div class="canvas-header">
+      <h2>布局可视化</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+    <svg id="labSvg" viewBox="0 0 800 600">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00c9a7"/></marker>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<script>
+const API = '';  // same origin
+
+const DEVICE_CATALOG = [
+  { id: 'arm_slider_arm', name: '机械臂 (Arm Slider)', size: [0.3, 0.3], type: 'articulation', color: '#6c63ff' },
+  { id: 'centrifuge_1', name: '离心机 (Centrifuge)', size: [0.4, 0.4], type: 'static', color: '#f59e0b' },
+  { id: 'pcr_1', name: 'PCR 仪 (Thermocycler)', size: [0.35, 0.25], type: 'static', color: '#ef4444' },
+  { id: 'vortex_1', name: '涡旋混合器 (Vortex)', size: [0.2, 0.2], type: 'static', color: '#22c55e' },
+  { id: 'plate_reader_1', name: '酶标仪 (Plate Reader)', size: [0.45, 0.35], type: 'static', color: '#3b82f6' },
+  { id: 'liquid_handler_1', name: '移液工作站', size: [0.6, 0.5], type: 'static', color: '#ec4899' },
+  { id: 'incubator_1', name: '培养箱 (Incubator)', size: [0.5, 0.45], type: 'static', color: '#8b5cf6' },
+  { id: 'balance_1', name: '天平 (Balance)', size: [0.25, 0.2], type: 'static', color: '#14b8a6' },
+];
+
+let selectedDevices = new Set(['arm_slider_arm', 'centrifuge_1', 'pcr_1']);
+
+function initDeviceChips() {
+  const container = document.getElementById('deviceChips');
+  container.innerHTML = DEVICE_CATALOG.map(d => 
+    `<div class="chip ${selectedDevices.has(d.id)?'selected':''}" data-id="${d.id}" onclick="toggleDevice('${d.id}', this)" style="border-color:${selectedDevices.has(d.id)?d.color:''}; ${selectedDevices.has(d.id)?'background:'+d.color:''}">${d.name}</div>`
+  ).join('');
+}
+
+function toggleDevice(id, el) {
+  const dev = DEVICE_CATALOG.find(d => d.id === id);
+  if (selectedDevices.has(id)) { selectedDevices.delete(id); el.classList.remove('selected'); el.style.borderColor=''; el.style.background=''; }
+  else { selectedDevices.add(id); el.classList.add('selected'); el.style.borderColor=dev.color; el.style.background=dev.color; }
+}
+
+function setExample(el) {
+  document.getElementById('nlInput').value = el.textContent;
+}
+
+function nlToIntents(text) {
+  const intents = [];
+  const lower = text.toLowerCase();
+  const devices = [...selectedDevices];
+  const arms = devices.filter(d => { const cat = DEVICE_CATALOG.find(c => c.id === d); return cat && cat.type === 'articulation'; });
+  const statics = devices.filter(d => { const cat = DEVICE_CATALOG.find(c => c.id === d); return cat && cat.type === 'static'; });
+
+  if (arms.length > 0 && (lower.includes('够到') || lower.includes('reach') || lower.includes('能到') || lower.includes('transfer') || lower.includes('机械臂'))) {
+    intents.push({ intent: 'reachable_by', params: { arm: arms[0], targets: statics }, description: `${arms[0]} must reach all target devices` });
+  }
+
+  const closeKeywords = ['近', 'close', 'together', '靠近', '放近', 'near', '挨着'];
+  const farKeywords = ['远', 'far', 'apart', '分开', '离.*远'];
+  if (closeKeywords.some(k => lower.includes(k))) {
+    const closeDevices = statics.length >= 2 ? statics : devices;
+    if (closeDevices.length >= 2) intents.push({ intent: 'close_together', params: { devices: closeDevices, priority: 'high' }, description: 'These devices should be placed close together' });
+  }
+  if (farKeywords.some(k => lower.match(new RegExp(k)))) {
+    if (statics.length >= 2) intents.push({ intent: 'far_apart', params: { devices: statics.slice(0, 2), priority: 'medium' }, description: 'These devices should be separated' });
+  }
+
+  if (lower.includes('workflow') || lower.includes('流程') || lower.includes('顺序')) {
+    intents.push({ intent: 'workflow_hint', params: { devices: statics, workflow: 'custom' }, description: 'Workflow order for devices' });
+  }
+
+  if (intents.length === 0) {
+    if (statics.length >= 2) intents.push({ intent: 'close_together', params: { devices: statics, priority: 'medium' }, description: 'Default: group devices together' });
+    if (arms.length > 0) intents.push({ intent: 'reachable_by', params: { arm: arms[0], targets: statics }, description: 'Arm should reach all devices' });
+  }
+
+  return intents;
+}
+
+function showStep(id, status, title, body) {
+  const el = document.getElementById(id);
+  if (!el) {
+    const pipeline = document.getElementById('pipeline');
+    const div = document.createElement('div');
+    div.className = 'step'; div.id = id;
+    div.innerHTML = `<div class="step-header"><div class="step-dot ${status}"></div>${title}</div><div class="step-body">${body}</div>`;
+    pipeline.appendChild(div);
+  } else {
+    el.querySelector('.step-dot').className = 'step-dot ' + status;
+    el.querySelector('.step-body').textContent = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+  }
+}
+
+async function runPipeline() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  document.getElementById('pipeline').innerHTML = '';
+
+  try {
+    const nl = document.getElementById('nlInput').value.trim();
+    if (!nl) { toast('请输入布局需求描述', 'error'); btn.disabled = false; return; }
+
+    // Step 1: NL → Intents
+    showStep('s1', 'active', '① 自然语言 → 意图解析', '正在解析...');
+    const intents = nlToIntents(nl);
+    showStep('s1', 'done', '① 自然语言 → 意图解析', JSON.stringify(intents, null, 2));
+
+    // Step 2: Interpret
+    showStep('s2', 'active', '② /interpret → 约束生成', '正在调用 API...');
+    const interpretRes = await fetch(API + '/api/v1/layout/interpret', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intents }),
+    });
+    const interpretData = await interpretRes.json();
+    showStep('s2', 'done', `② /interpret → ${interpretData.constraints?.length || 0} 条约束`, JSON.stringify(interpretData, null, 2));
+
+    // Step 3: Optimize
+    showStep('s3', 'active', '③ /optimize → 布局计算', '正在优化 (DE 算法运行中)...');
+    const devices = [...selectedDevices].map(id => {
+      const cat = DEVICE_CATALOG.find(c => c.id === id);
+      return { id: cat.id, name: cat.name, size: cat.size, device_type: cat.type };
+    });
+    const labW = parseFloat(document.getElementById('labW').value);
+    const labD = parseFloat(document.getElementById('labD').value);
+
+    const optRes = await fetch(API + '/api/v1/layout/optimize', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        devices, lab: { width: labW, depth: labD },
+        constraints: interpretData.constraints || [],
+        workflow_edges: interpretData.workflow_edges || [],
+        seeder: 'compact_outward', maxiter: 200,
+      }),
+    });
+    const optData = await optRes.json();
+    showStep('s3', optData.success ? 'done' : 'error',
+      `③ /optimize → ${optData.success ? '成功' : '失败'} (cost=${optData.cost?.toFixed(2)})`,
+      JSON.stringify(optData, null, 2));
+
+    // Step 4: Render
+    if (optData.placements) {
+      renderLab(labW, labD, optData.placements, devices);
+      document.getElementById('stats').innerHTML = `
+        <span>设备 <span class="val">${optData.placements.length}</span></span>
+        <span>Cost <span class="val">${optData.cost?.toFixed(2)}</span></span>
+        <span>Seeder <span class="val">${optData.seeder_used}</span></span>
+        <span>DE <span class="val">${optData.de_ran ? '✓' : '✗'}</span></span>
+      `;
+    }
+
+  } catch (e) {
+    showStep('s_err', 'error', '错误', e.message);
+  }
+  btn.disabled = false;
+}
+
+function renderLab(labW, labD, placements, devices) {
+  const svg = document.getElementById('labSvg');
+  const pad = 60;
+  const svgW = svg.clientWidth || 800;
+  const svgH = svg.clientHeight || 600;
+  const scale = Math.min((svgW - pad*2) / labW, (svgH - pad*2) / labD);
+  const ox = (svgW - labW * scale) / 2;
+  const oy = (svgH - labD * scale) / 2;
+
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+  let html = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00c9a7"/></marker></defs>`;
+
+  // Grid
+  const gridStep = 0.5;
+  for (let x = 0; x <= labW; x += gridStep) {
+    const sx = ox + x * scale;
+    html += `<line x1="${sx}" y1="${oy}" x2="${sx}" y2="${oy + labD*scale}" class="grid-line"/>`;
+  }
+  for (let y = 0; y <= labD; y += gridStep) {
+    const sy = oy + y * scale;
+    html += `<line x1="${ox}" y1="${sy}" x2="${ox + labW*scale}" y2="${sy}" class="grid-line"/>`;
+  }
+
+  // Lab boundary
+  html += `<rect x="${ox}" y="${oy}" width="${labW*scale}" height="${labD*scale}" class="lab-bg"/>`;
+
+  // Dimension labels
+  html += `<text x="${ox + labW*scale/2}" y="${oy - 10}" class="dimension-text">${labW}m</text>`;
+  html += `<text x="${ox - 10}" y="${oy + labD*scale/2}" class="dimension-text" transform="rotate(-90,${ox-10},${oy+labD*scale/2})">${labD}m</text>`;
+
+  // Devices
+  for (const p of placements) {
+    const dev = devices.find(d => d.id === p.device_id) || {};
+    const cat = DEVICE_CATALOG.find(c => c.id === p.device_id) || {};
+    const w = (dev.size?.[0] || 0.3) * scale;
+    const h = (dev.size?.[1] || 0.3) * scale;
+    const cx = ox + p.position.x * scale;
+    const cy = oy + (labD - p.position.y) * scale;
+    const angle = -(p.rotation?.z || 0) * 180 / Math.PI;
+    const color = cat.color || '#666';
+
+    html += `<g transform="translate(${cx},${cy}) rotate(${angle})">`;
+    html += `<rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" class="device-rect" fill="${color}22" stroke="${color}"/>`;
+    // Front direction indicator
+    html += `<line x1="0" y1="0" x2="0" y2="${-h/2 - 8}" class="device-direction"/>`;
+    html += `</g>`;
+    // Label (not rotated)
+    const shortName = (cat.name || p.device_id).split('(')[0].trim().slice(0, 8);
+    html += `<text x="${cx}" y="${cy + h/2 + 14}" class="device-label" style="font-size:10px; fill:${color}">${shortName}</text>`;
+    html += `<text x="${cx}" y="${cy}" class="device-label" style="font-size:9px; fill:#fff8">(${p.position.x.toFixed(2)}, ${p.position.y.toFixed(2)})</text>`;
+  }
+
+  svg.innerHTML = html;
+}
+
+function toast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Init
+initDeviceChips();
+renderLab(4, 3, [], []);
+</script>
+</body>
+</html>
