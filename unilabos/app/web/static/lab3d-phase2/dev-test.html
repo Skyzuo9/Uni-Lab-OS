@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Uni-Lab 3D Phase 2 独立测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1e1e1e; color: #eee; font-family: monospace; overflow: hidden; }
+        #canvas-container { width: 75vw; height: 100vh; float: left; }
+        #info-panel {
+            width: 25vw; height: 100vh; float: right;
+            background: #2d2d2d; padding: 16px; overflow-y: auto;
+            border-left: 1px solid #444;
+        }
+        h3 { color: #4fc3f7; margin: 12px 0 6px; }
+        .status { padding: 4px 8px; margin: 2px 0; border-radius: 3px; font-size: 13px; }
+        .ok { background: #2e7d32; }
+        .warn { background: #f57f17; color: #000; }
+        .err { background: #c62828; }
+        .pending { background: #555; }
+        button { background: #4fc3f7; border: none; padding: 6px 16px; cursor: pointer; margin: 4px; border-radius: 4px; }
+        button:hover { background: #81d4fa; }
+        #log { font-size: 11px; max-height: 300px; overflow-y: auto; background: #1a1a1a; padding: 8px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="info-panel">
+        <h2>Phase 2 模块测试</h2>
+
+        <h3>连接状态</h3>
+        <div id="status-foxglove" class="status pending">Foxglove Bridge: 未连接</div>
+        <div id="status-joint" class="status pending">/joint_states: 无数据</div>
+        <div id="status-resource" class="status pending">resource_pose: 无数据</div>
+        <div id="status-device" class="status pending">/ws/device_status: 未连接</div>
+        <div id="status-traj" class="status pending">轨迹预览: 无数据</div>
+
+        <h3>操作</h3>
+        <button onclick="testJointPublish()">模拟 /joint_states</button>
+        <button onclick="testResourcePose()">模拟耗材移动</button>
+        <button onclick="testDeviceStatus()">模拟设备状态变更</button>
+        <button onclick="testTrajectory()">模拟轨迹播放</button>
+
+        <h3>URDF 加载</h3>
+        <div>
+            <input id="urdf-url" value="http://localhost:8002/api/v1/urdf" style="width: 90%; padding: 4px;">
+            <button onclick="loadUrdfFromUrl()">加载</button>
+        </div>
+
+        <h3>日志</h3>
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        import { createScene, loadURDF, updateJointState, animate } from './urdf-scene.js';
+        import { RosBridge } from './ros-bridge.js';
+
+        const log = (msg) => {
+            const el = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            el.innerHTML = `[${time}] ${msg}\n` + el.innerHTML;
+            if (el.childNodes.length > 200) el.innerHTML = el.innerHTML.slice(0, 5000);
+        };
+
+        // 初始化 Three.js 场景
+        const scene = createScene(document.getElementById('canvas-container'));
+        animate();
+        log('Three.js 场景已初始化');
+
+        // 连接 Foxglove Bridge
+        const bridge = new RosBridge('ws://' + window.location.hostname + ':8765');
+        bridge.connect();
+
+        bridge.on('/joint_states', (msg) => {
+            updateJointState(msg);
+            const el = document.getElementById('status-joint');
+            el.className = 'status ok';
+            el.textContent = `/joint_states: ${msg.name?.length || 0} 个关节`;
+        });
+
+        // 定时检查连接状态
+        setInterval(() => {
+            const el = document.getElementById('status-foxglove');
+            if (bridge.connected) {
+                el.className = 'status ok';
+                el.textContent = 'Foxglove Bridge: ✓ 已连接';
+            } else {
+                el.className = 'status err';
+                el.textContent = 'Foxglove Bridge: ✗ 未连接';
+            }
+        }, 2000);
+
+        // 模拟函数挂到 window 上供按钮调用
+        window.testJointPublish = () => {
+            const mockMsg = {
+                name: ['joint_1', 'joint_2', 'joint_3'],
+                position: [Math.random() * 3.14, Math.random() * 3.14, Math.random() * 3.14],
+            };
+            updateJointState(mockMsg);
+            log('模拟 joint_states 已发送');
+        };
+
+        window.testResourcePose = () => {
+            log('模拟 resource_pose（需 resource-tracker.js 集成后测试）');
+        };
+
+        window.testDeviceStatus = () => {
+            log('模拟 device_status（需 status-overlay.js 集成后测试）');
+        };
+
+        window.testTrajectory = () => {
+            log('模拟轨迹播放（需 trajectory-player.js 集成后测试）');
+        };
+
+        window.loadUrdfFromUrl = () => {
+            const url = document.getElementById('urdf-url').value;
+            log(`正在加载 URDF: ${url}`);
+            loadURDF(url, url.replace('/api/v1/urdf', '/meshes/'))
+                .then(() => log('✓ URDF 加载成功'))
+                .catch(e => log('✗ URDF 加载失败: ' + e.message));
+        };
+    </script>
+</body>
+</html>

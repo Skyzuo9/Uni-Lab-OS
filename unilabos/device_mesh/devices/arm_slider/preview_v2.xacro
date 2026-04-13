@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="preview_arm_slider_v2">
+  <xacro:arg name="mesh_path" default="/Users/newtides/Downloads/Uni-Lab-OS-main/unilabos/device_mesh" />
+
+  <xacro:include filename="macro_device_v2.xacro" />
+
+  <link name="world" />
+
+  <xacro:arm_slider_v2
+    mesh_path="$(arg mesh_path)"
+    parent_link="world"
+    station_name="preview_"
+    device_name="arm_slider_"
+    x="0" y="0" z="0"
+    rx="0" ry="0" r="0" />
+</robot>

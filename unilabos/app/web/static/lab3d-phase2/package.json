@@ -1,0 +1,20 @@
+{
+  "name": "lab3d-phase2",
+  "version": "1.0.0",
+  "description": "Uni-Lab 3D Phase 2 - 工作流 3D 模拟同步",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "three": "^0.170.0",
+    "urdf-loader": "^0.12.4",
+    "roslib": "^1.4.1",
+    "@foxglove/ws-protocol": "^0.6.3"
+  },
+  "devDependencies": {
+    "vite": "^6.2.2"
+  }
+}

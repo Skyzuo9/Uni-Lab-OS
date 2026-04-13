@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../rviz-main"
+		},
+		{
+			"path": "../../uni-lab-assets-main"
+		}
+	],
+	"settings": {}
+}
