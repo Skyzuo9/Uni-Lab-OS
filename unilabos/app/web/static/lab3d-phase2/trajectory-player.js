@@ -1,10 +1,5 @@
 import { updateJointState } from './urdf-scene.js';
 
-/**
- * MoveIt2 轨迹预览播放器。
- * 订阅 /move_group/display_planned_path (DisplayTrajectory)，
- * 按时间戳线性插值逐帧回放规划动画。
- */
 export class TrajectoryPlayer {
     constructor(robot, container) {
         this.robot = robot;
@@ -13,7 +8,6 @@ export class TrajectoryPlayer {
         this.playbackSpeed = 1.0;
         this._startTime = 0;
         this._animFrameId = null;
-
         this._buildUI(container);
     }
 
@@ -35,10 +29,9 @@ export class TrajectoryPlayer {
 
         const total = this.trajectory.points.at(-1).timeFromStart;
         this._showPanel(total);
-        console.log(`[TrajectoryPlayer] loaded ${this.trajectory.points.length} waypoints, ${total.toFixed(2)}s`);
+        console.log('[TrajectoryPlayer] loaded ' + this.trajectory.points.length + ' waypoints, ' + total.toFixed(2) + 's');
     }
 
-    /** 手动加载轨迹数据（测试用） */
     loadFromRawPoints(jointNames, points) {
         this.trajectory = { jointNames, points };
         this._showPanel(points.at(-1).timeFromStart);

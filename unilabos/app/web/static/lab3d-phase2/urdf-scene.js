@@ -40,12 +40,6 @@ export function createScene(container) {
     return scene;
 }
 
-/**
- * 加载 URDF 并添加到场景。
- * @param {string} urdfUrl - URDF 文件的 URL（如 /api/v1/urdf）
- * @param {string} meshBaseUrl - 网格文件基础 URL（如 /meshes/）
- * @returns {Promise<Object>} 加载完成的 robot 对象
- */
 export function loadURDF(urdfUrl, meshBaseUrl = '') {
     return new Promise((resolve, reject) => {
         fetch(urdfUrl)
@@ -65,11 +59,6 @@ export function loadURDF(urdfUrl, meshBaseUrl = '') {
     });
 }
 
-/**
- * 用 /joint_states 数据更新 URDF 关节角。
- * urdf-loader 的 robot.joints 是 { jointName: URDFJoint } 的 Map，
- * 每个 URDFJoint 有 .setJointValue(angle) 方法。
- */
 export function updateJointState(jointState) {
     if (!robot || !robot.joints) return;
 
@@ -82,9 +71,6 @@ export function updateJointState(jointState) {
     }
 }
 
-/**
- * 获取场景中所有设备 mesh 名称列表
- */
 export function getDeviceMeshNames() {
     const names = [];
     if (robot) {
@@ -93,6 +79,21 @@ export function getDeviceMeshNames() {
         });
     }
     return names;
+}
+
+export function loadURDFText(urdfContent, meshBaseUrl = '') {
+    if (robot) { scene.remove(robot); robot = null; }
+    const loader = new URDFLoader();
+    loader.parseVisual = true;
+    loader.packages = '';
+    loader.workingPath = meshBaseUrl;
+    robot = loader.parse(urdfContent);
+    scene.add(robot);
+    return robot;
+}
+
+export function clearRobot() {
+    if (robot) { scene.remove(robot); robot = null; }
 }
 
 export function getRobot() { return robot; }

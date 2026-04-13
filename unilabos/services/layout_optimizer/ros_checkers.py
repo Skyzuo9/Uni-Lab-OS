@@ -143,15 +143,6 @@ class MoveItCollisionChecker:
                 out_of_bounds.append(p["id"])
         return out_of_bounds
 
-    def sync_to_planning_scene(self, placements: list[dict]) -> None:
-        """优化完成后，将最终布局一次性同步到 MoveIt2 规划场景。
-
-        在 DE 优化循环中不要调用此方法（性能敏感）；
-        仅在 service.py 拿到最终结果后调用一次。
-        """
-        self._sync_collision_objects(placements)
-        logger.info("Synced %d devices to MoveIt2 planning scene", len(placements))
-
     def _sync_collision_objects(self, placements: list[dict]) -> None:
         """将设备布局同步到 MoveIt2 规划场景。
 

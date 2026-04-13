@@ -1,11 +1,5 @@
 import * as THREE from 'three';
 
-/**
- * 设备状态实时着色。
- * 订阅 FastAPI /ws/device_status WebSocket（已有，1Hz 推送）。
- * 根据状态改变设备 mesh 的发光颜色。
- */
-
 const STATUS_COLORS = {
     idle:       0x888888,
     running:    0x2196F3,
@@ -26,12 +20,12 @@ export class StatusOverlay {
             const mesh = this.scene.getObjectByName(id);
             if (mesh) this.deviceMeshes.set(id, mesh);
         }
-        console.log(`[StatusOverlay] registered ${this.deviceMeshes.size} devices`);
+        console.log('[StatusOverlay] registered ' + this.deviceMeshes.size + ' devices');
     }
 
-    connectWebSocket(baseUrl = '') {
+    connectWebSocket(baseUrl) {
         const host = baseUrl || window.location.host;
-        const wsUrl = `ws://${host}/api/v1/ws/device_status`;
+        const wsUrl = 'ws://' + host + '/api/v1/ws/device_status';
 
         this.ws = new WebSocket(wsUrl);
 
@@ -69,7 +63,6 @@ export class StatusOverlay {
         }
     }
 
-    /** 手动设置状态（测试用） */
     setStatus(deviceId, status) {
         this._apply({ [deviceId]: status });
     }

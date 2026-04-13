@@ -76,8 +76,7 @@ def seed_layout(
         return []
 
     if params is None:
-        from .pencil_integration import generate_fallback
-        return generate_fallback(devices, lab)
+        return _row_fallback(devices, lab)
 
     return _force_simulation(devices, lab, params, edges)
 
@@ -329,3 +328,20 @@ def _resolve_collisions(
                   theta=thetas[i], uuid=placements[i].uuid)
         for i in range(n)
     ]
+
+def _row_fallback(devices: list[Device], lab: Lab) -> list[Placement]:
+    """简单行列布局回退方案，替代已移除的 pencil_integration。"""
+    if not devices:
+        return []
+    cols = max(1, int(math.ceil(math.sqrt(len(devices)))))
+    rows_count = max(1, math.ceil(len(devices) / cols))
+    margin = 0.3
+    placements = []
+    for i, dev in enumerate(devices):
+        row, col = divmod(i, cols)
+        x = margin + (col + 0.5) * (lab.width - 2 * margin) / cols
+        y = margin + (row + 0.5) * (lab.depth - 2 * margin) / rows_count
+        x = min(max(x, dev.bbox[0] / 2), lab.width - dev.bbox[0] / 2)
+        y = min(max(y, dev.bbox[1] / 2), lab.depth - dev.bbox[1] / 2)
+        placements.append(Placement(device_id=dev.id, x=x, y=y, theta=0.0))
+    return placements

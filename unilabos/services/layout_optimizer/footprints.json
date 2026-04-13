@@ -5729,10 +5729,10 @@
   },
   "opentrons_liquid_handler": {
     "bbox": [
-      0.6243,
-      0.5672
+      0.63,
+      0.57
     ],
-    "height": 0.662,
+    "height": 0.66,
     "origin_offset": [
       0.3122,
       -0.2836
@@ -9513,10 +9513,10 @@
   },
   "thermo_orbitor_rs2_hotel": {
     "bbox": [
-      0.149,
-      0.6913
+      0.15,
+      0.66
     ],
-    "height": 0.333,
+    "height": 0.14,
     "origin_offset": [
       -0.002,
       -0.3148
@@ -10209,8 +10209,8 @@
   },
   "elite_robot": {
     "bbox": [
-      0.2,
-      0.2
+      0.12,
+      0.13
     ],
     "height": 0.1,
     "origin_offset": [
@@ -10254,5 +10254,41 @@
     "thumbnail_file": "",
     "openings": [],
     "source": "manual"
+  },
+  "liquid_transform_xyz": {
+    "bbox": [
+      0.86,
+      0.62
+    ],
+    "height": 0.62,
+    "origin_offset": [
+      0,
+      0
+    ],
+    "openings": []
+  },
+  "slide_w140": {
+    "bbox": [
+      1.07,
+      0.22
+    ],
+    "height": 0.08,
+    "origin_offset": [
+      0,
+      0
+    ],
+    "openings": []
+  },
+  "toyo_xyz": {
+    "bbox": [
+      1.17,
+      0.22
+    ],
+    "height": 0.09,
+    "origin_offset": [
+      0,
+      0
+    ],
+    "openings": []
   }
 }

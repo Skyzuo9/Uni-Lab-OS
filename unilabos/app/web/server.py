@@ -7,6 +7,7 @@ Web服务器模块
 import webbrowser
 
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
@@ -26,6 +27,14 @@ app = FastAPI(
 
 # 创建页面路由
 pages = None
+# Layout Optimizer 路由在模块加载时即注册
+# 确保 uvicorn 直接加载 server:app 和通过 unilab CLI 启动两种方式均可用
+try:
+    from unilabos.app.web.routers.layout import layout_router
+    app.include_router(layout_router, prefix="/api/v1")
+except Exception as _e:
+    import logging
+    logging.getLogger(__name__).warning("Layout optimizer routes not loaded: %s", _e)
 
 # noinspection PyTypeChecker
 app.add_middleware(
@@ -35,6 +44,18 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
+
+# Serve static files from unilabos/app/web/static/
+import os as _os
+_static_dir = _os.path.join(_os.path.dirname(__file__), "static")
+if _os.path.isdir(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+# 挂载设备 mesh 文件（供 Three.js URDF Loader 通过 HTTP 访问 STL 文件）
+_mesh_dir = _os.path.join(_os.path.dirname(__file__), "..", "..", "device_mesh")
+_mesh_dir = _os.path.abspath(_mesh_dir)
+if _os.path.isdir(_mesh_dir):
+    app.mount("/meshes", StaticFiles(directory=_mesh_dir), name="meshes")
 
 
 @app.middleware("http")
@@ -161,6 +182,17 @@ def start_server(host: str = "0.0.0.0", port: int = 8002, open_browser: bool = T
 
     return False
 
+
+
+# Auto-initialize when loaded by uvicorn directly (e.g. uvicorn server:app)
+_setup_done = False
+def _auto_setup():
+    global _setup_done
+    if not _setup_done:
+        _setup_done = True
+        setup_server()
+
+_auto_setup()
 
 # 当脚本直接运行时启动服务器
 if __name__ == "__main__":

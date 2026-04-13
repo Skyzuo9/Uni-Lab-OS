@@ -2,11 +2,7 @@
 
 编码：N 个设备 → 3N 维向量 [x0, y0, θ0, x1, y1, θ1, ...]
 使用 scipy.optimize.differential_evolution 进行全局优化。
-初始种子布局注入为种群种子个体加速收敛。
-
-注：此版本已移除 pencil_integration 依赖。
-    种子布局由调用方（service.py）通过 seeders 生成后传入，
-    或在 seed_placements=None 时由 seeders.create_seed 自动生成。
+初始布局（Pencil/回退）注入为种群种子个体加速收敛。
 """
 
 from __future__ import annotations
@@ -21,7 +17,6 @@ from scipy.optimize import differential_evolution
 from .constraints import evaluate_constraints, evaluate_default_hard_constraints
 from .mock_checkers import MockCollisionChecker, MockReachabilityChecker
 from .models import Constraint, Device, Lab, Placement
-from .seeders import resolve_seeder_params, seed_layout, SeederParams
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +28,6 @@ def optimize(
     collision_checker: Any | None = None,
     reachability_checker: Any | None = None,
     seed_placements: list[Placement] | None = None,
-    seeder: str = "compact_outward",
     maxiter: int = 200,
     popsize: int = 15,
     tol: float = 1e-6,
@@ -47,8 +41,7 @@ def optimize(
         constraints: 用户自定义约束列表（可选）
         collision_checker: 碰撞检测实例（默认使用 MockCollisionChecker）
         reachability_checker: 可达性检测实例（默认使用 MockReachabilityChecker）
-        seed_placements: 种子布局（若为 None 则通过 seeder 自动生成）
-        seeder: 种子策略名称，当 seed_placements=None 时生效
+        seed_placements: 种子布局（若为 None 则自动生成）
         maxiter: 最大迭代次数
         popsize: 种群大小倍数
         tol: 收敛容差
@@ -70,19 +63,20 @@ def optimize(
     n = len(devices)
 
     # 构建边界：每个设备 (x, y, θ)
+    # 使用较小半径作为搜索边界，让 graduated boundary penalty 处理实际越界
+    # 对角线半径过于保守，会阻止长设备贴边对齐
     bounds = []
     for dev in devices:
         half_min = min(dev.bbox[0], dev.bbox[1]) / 2
         bounds.append((half_min, lab.width - half_min))   # x
         bounds.append((half_min, lab.depth - half_min))   # y
-        bounds.append((0, 2 * math.pi))                    # θ
+        bounds.append((0, 2 * math.pi))                     # θ
     bounds_array = np.array(bounds)
 
-    # 生成种子个体
+    # 生成种子个体（调用方应通过 seeders.seed_layout 提供）
     if seed_placements is None:
-        preset = seeder if seeder != "row_fallback" else "compact_outward"
-        params = resolve_seeder_params(preset)
-        seed_placements = seed_layout(devices, lab, params)
+        from .seeders import seed_layout, PRESETS
+        seed_placements = seed_layout(devices, lab, PRESETS["compact_outward"])
 
     seed_vector = _placements_to_vector(seed_placements, devices)
 
@@ -130,7 +124,7 @@ def optimize(
         init=init_pop,
         maxiter=maxiter,
         tol=tol,
-        atol=1e-3,
+        atol=1e-3,  # Absolute tolerance: stop when population costs converge near 0
         mutation=(0.5, 1.0),
         recombination=0.7,
         seed=seed,
@@ -146,7 +140,10 @@ def optimize(
 
 
 def snap_theta(placements: list[Placement], threshold_deg: float = 15.0) -> list[Placement]:
-    """Snap each placement's theta to nearest 90° if within threshold."""
+    """Snap each placement's theta to nearest 90° if within threshold.
+
+    Returns new Placement list (does not mutate input).
+    """
     threshold_rad = math.radians(threshold_deg)
     cardinals = [0, math.pi / 2, math.pi, 3 * math.pi / 2, 2 * math.pi]
     result = []
@@ -166,6 +163,10 @@ def snap_theta(placements: list[Placement], threshold_deg: float = 15.0) -> list
 def _placements_to_vector(
     placements: list[Placement], devices: list[Device]
 ) -> np.ndarray:
+    """将 Placement 列表编码为 3N 维向量。
+
+    按 devices 列表的顺序排列。若某设备在 placements 中缺失，用 (0, 0, 0) 填充。
+    """
     placement_map = {p.device_id: p for p in placements}
     vec = np.zeros(3 * len(devices))
     for i, dev in enumerate(devices):
@@ -180,6 +181,7 @@ def _placements_to_vector(
 def _vector_to_placements(
     x: np.ndarray, devices: list[Device]
 ) -> list[Placement]:
+    """将 3N 维向量解码为 Placement 列表。"""
     placements = []
     for i, dev in enumerate(devices):
         placements.append(
