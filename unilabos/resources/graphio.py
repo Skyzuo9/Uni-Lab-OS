@@ -593,7 +593,7 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
             "size_y": resource["config"].get("size_y", 0),
             "size_z": resource["config"].get("size_z", 0),
             "location": {**resource["position"], "type": "Coordinate"},
-            "rotation": {"x": 0, "y": 0, "z": 0, "type": "Rotation"},  # Resource如果没有rotation，是plr版本太低
+            "rotation": {resource["config"].get("rotation", {"x": 0, "y": 0, "z": 0, "type": "Rotation"})},  # Resource如果没有rotation，是plr版本太低
             "category": resource["type"],
             "model": resource["config"].get("model", None),  # resource中deck没有model
             "children": (
