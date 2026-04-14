@@ -1337,26 +1337,6 @@ def setup_api_routes(app):
     app.include_router(admin, prefix="/admin/v1", tags=["admin"])
     app.include_router(api, prefix="/api/v1", tags=["api"])
 
-    # Layout Optimizer 路由
-    try:
-        from unilabos.app.web.routers.layout import layout_router
-        app.include_router(layout_router, prefix="/api/v1", tags=["layout"])
-    except ImportError as e:
-        import logging
-        logging.getLogger(__name__).warning("Layout optimizer routes not loaded: %s", e)
-
-    # Lab3D 设计器页面
-    from fastapi.responses import FileResponse
-    from pathlib import Path
-
-    from starlette.staticfiles import StaticFiles
-    app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
-
-    @app.get("/lab3d")
-    async def lab3d_page():
-        html_path = Path(__file__).parent / "static" / "lab3d.html"
-        return FileResponse(html_path, media_type="text/html")
-
     # 启动广播任务
     @app.on_event("startup")
     async def startup_event():

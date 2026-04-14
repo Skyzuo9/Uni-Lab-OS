@@ -174,38 +174,6 @@ def setup_web_pages(router: APIRouter) -> None:
             error(f"打开文件夹时出错: {str(e)}")
             return {"status": "error", "message": f"Failed to open folder: {str(e)}"}
 
-
-    @router.get("/layout", response_class=HTMLResponse, summary="Layout Optimizer")
-    async def layout_page() -> str:
-        """
-        布局优化器页面 - 2D/3D 统一前端
-
-        Returns:
-            HTMLResponse: 渲染后的HTML页面
-        """
-        import glob
-        import os
-        try:
-            # Collect available station JSON files
-            stations = []
-            search_dirs = [
-                os.path.join(os.path.dirname(__file__), "../../../"),
-                os.path.join(os.path.dirname(__file__), "../../../unilabos/test/experiments/"),
-                os.path.join(os.path.dirname(__file__), "../../../unilabos/test/experiments/Protocol_Test_Station/"),
-                os.path.join(os.path.dirname(__file__), "../../../unilabos/test/experiments/comprehensive_protocol/"),
-            ]
-            for search_dir in search_dirs:
-                for json_file in glob.glob(os.path.join(search_dir, "*.json")):
-                    name = os.path.basename(json_file)
-                    stations.append({"name": name, "path": os.path.abspath(json_file)})
-
-            template = env.get_template("layout.html")
-            html = template.render(stations=stations)
-            return html
-        except Exception as e:
-            error(f"生成布局优化器页面时出错: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error generating layout page: {str(e)}")
-
     @router.get("/registry-editor", response_class=HTMLResponse, summary="Registry Editor")
     async def registry_editor_page() -> str:
         """

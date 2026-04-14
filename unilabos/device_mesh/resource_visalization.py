@@ -35,11 +35,6 @@ def get_pattern_matches(folder, pattern):
                 matches.append(child)
     return matches
 
-def _sanitize_ros_name(name: str) -> str:
-    """Replace characters invalid in ROS 2 names (anything other than [a-zA-Z0-9_]) with '_'."""
-    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
-
-
 class ResourceVisualization:
     def __init__(self, device: dict, resource: dict, enable_rviz: bool = True):
         """初始化资源可视化类
@@ -130,8 +125,7 @@ class ResourceVisualization:
                         new_dev = etree.SubElement(self.root, f"{{{xacro_uri}}}{model_config['mesh']}")
                         new_dev.set("parent_link", "world")
                         new_dev.set("mesh_path", str(self.mesh_path))
-                        safe_id = _sanitize_ros_name(node["id"])
-                        new_dev.set("device_name", safe_id + "_")
+                        new_dev.set("device_name", node["id"]+"_")
                         # if node["parent"] is not None:
                         #     new_dev.set("station_name", node["parent"]+'_')
                         if "position" in node:
@@ -158,15 +152,15 @@ class ResourceVisualization:
                             new_include_controller = etree.SubElement(self.root, f"{{{xacro_uri}}}include")
                             new_include_controller.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/config/macro.ros2_control.xacro")
                             new_controller = etree.SubElement(self.root, f"{{{xacro_uri}}}{model_config['mesh']}_ros2_control")
-                            new_controller.set("device_name", safe_id + "_")
+                            new_controller.set("device_name", node["id"]+"_")
                             new_controller.set("mesh_path", str(self.mesh_path))
 
                             # 添加moveit的srdf
                             new_include_srdf = etree.SubElement(self.root_srdf, f"{{{xacro_uri}}}include")
                             new_include_srdf.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/config/macro.srdf.xacro")
                             new_srdf = etree.SubElement(self.root_srdf, f"{{{xacro_uri}}}{model_config['mesh']}_srdf")
-                            new_srdf.set("device_name", safe_id + "_")
-                            self.moveit_nodes[safe_id] = model_config['mesh']
+                            new_srdf.set("device_name", node["id"]+"_")
+                            self.moveit_nodes[node["id"]] = model_config['mesh']
                     else:
                         print("错误的注册表类型！")
         re = etree.tostring(self.root, encoding="unicode")

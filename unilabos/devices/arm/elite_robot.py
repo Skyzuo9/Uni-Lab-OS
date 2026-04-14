@@ -1,25 +1,22 @@
 import socket
 import re
 import time
-import threading
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Header
 
 
 class EliteRobot:
-    def __init__(self, device_id, host, **kwargs):
+    def __init__(self,device_id, host, **kwargs):
         self.host = host
         self.node = Node(f"{device_id}")
         self.joint_state_msg = JointState()
-        self.joint_state_msg.header = Header()
         self.joint_state_msg.name = [f"{device_id}_shoulder_pan_joint",
-                                     f"{device_id}_shoulder_lift_joint",
-                                     f"{device_id}_elbow_joint",
-                                     f"{device_id}_wrist_1_joint",
-                                     f"{device_id}_wrist_2_joint",
+                                     f"{device_id}_shoulder_lift_joint", 
+                                     f"{device_id}_elbow_joint", 
+                                     f"{device_id}_wrist_1_joint", 
+                                     f"{device_id}_wrist_2_joint", 
                                      f"{device_id}_wrist_3_joint"]
-
+        
         self.job_id = 0
         self.joint_state_pub = self.node.create_publisher(JointState, "/joint_states", 10)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,27 +35,14 @@ class EliteRobot:
         except Exception as e:
             print(f"连接到 {self.host}:{40011} 失败: {e}")
 
-        # 阶段二：高频关节状态定时发布（供前端 3D 动画）
-        self._tcp_lock = threading.Lock()
-        self._joint_poll_rate = 20.0  # Hz
-        self._joint_poll_timer = self.node.create_timer(
-            1.0 / self._joint_poll_rate,
-            self._poll_joint_state
-        )
-
-    def _poll_joint_state(self):
-        """20Hz 定时轮询关节角并发布到 /joint_states"""
-        try:
-            self.get_actual_joint_positions()
-        except Exception:
-            pass
-
     def modbus_close(self):
         self.modbus_sock.close()
+        
 
     @property
     def arm_pose(self) -> list[float]:
         return self.get_actual_joint_positions()
+    
 
     def modbus_write_single_register(self, unit_id, register_addr, value):
         """
@@ -149,6 +133,7 @@ class EliteRobot:
             job = self.modbus_read_holding_registers(1, 257, 1)[0]
             self.get_actual_joint_positions()
 
+            
     def modbus_task_cmd(self, command):
 
         if command == "lh2hplc":
@@ -159,11 +144,10 @@ class EliteRobot:
             self.modbus_task(3)
             self.modbus_task(4)
             self.modbus_task(0)
-
+        
     def send_command(self, command):
-        with self._tcp_lock:
-            self.sock.sendall(command.encode('utf-8'))
-            response = self.sock.recv(1024).decode('utf-8')
+        self.sock.sendall(command.encode('utf-8'))
+        response = self.sock.recv(1024).decode('utf-8')
         return response
 
     def close(self):
@@ -194,17 +178,17 @@ class EliteRobot:
         response = self.send_command(f"req 1 get_actual_joint_positions()\n")
         joint_positions = self.parse_success_response(response)
         if joint_positions:
-            self.joint_state_msg.header.stamp = self.node.get_clock().now().to_msg()
             self.joint_state_msg.position = joint_positions
             self.joint_state_pub.publish(self.joint_state_msg)
             return joint_positions
         return None
 
 
+
 if __name__ == "__main__":
     import rclpy
     rclpy.init()
-    client = EliteRobot('aa', "192.168.1.200")
+    client = EliteRobot('aa',"192.168.1.200")
     print(client.parse_success_response(client.send_command("req 1 get_actual_joint_positions()\n")))
     client.modbus_write_single_register(1, 256, 4)
     print(client.modbus_read_holding_registers(1, 257, 1))
