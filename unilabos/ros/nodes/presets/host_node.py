@@ -27,11 +27,18 @@ from unilabos_msgs.srv import (
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 from unique_identifier_msgs.msg import UUID
 
-from unilabos.registry.decorators import device, action, NodeType
-from unilabos.registry.placeholder_type import ResourceSlot, DeviceSlot
+from unilabos.registry.decorators import device, action, NodeType, ActionInputHandle, ActionOutputHandle, DataSource
+from unilabos.registry.placeholder_type import (
+    ResourceSlot,
+    DeviceSlot,
+    PLACEHOLDER_RESOURCES,
+    PLACEHOLDER_MANUAL_CONFIRM,
+    PLACEHOLDER_DEDUCT_RESOURCE,
+)
 from unilabos.registry.registry import lab_registry
 from unilabos.resources.container import RegularContainer
 from unilabos.resources.graphio import initialize_resource
+from unilabos.resources.liquids import apply_substances
 from unilabos.resources.registry import add_schema
 from unilabos.resources.resource_tracker import (
     ResourceDict,
@@ -69,15 +76,15 @@ class DeviceActionStatus:
 
 
 class TestResourceReturn(TypedDict):
-    resources: List[List[ResourceDict]]
-    devices: List[Dict[str, Any]]
-    # unilabos_samples: List[LabSample]
+    resources: List[List[ResourceDictType]]
+    devices: List[DeviceSlot]
+    unilabos_samples: List[LabSample]
 
 
 class CreateResourceReturn(TypedDict):
-    created_resource_tree: List[List[ResourceDict]]
+    created_resource_tree: List[List[ResourceDictType]]
     liquid_input_resource_tree: List[Dict[str, Any]]
-    # unilabos_samples: List[LabSample]
+    unilabos_samples: List[LabSample]
 
 
 class TestLatencyReturn(TypedDict):
@@ -594,19 +601,9 @@ class HostNode(BaseROS2DeviceNode):
                 "z": bind_locations.z,
             },
         }
-        if len(liquid_input_slot) and liquid_input_slot[0] == -1:  # 目前container只逐个创建
-            res_creation_input.update(
-                {
-                    "data": {
-                        "liquids": [
-                            {
-                                "liquid_type": liquid_type[0] if liquid_type else None,
-                                "liquid_volume": liquid_volume[0] if liquid_volume else None,
-                            }
-                        ]
-                    }
-                }
-            )
+        # 注: 容器自身液体 (liquid_input_slot == [-1]) 不再通过 data.liquids 预埋
+        # （initialize_resource 仅按 class+name 重建，data 会被丢弃），统一由设备侧
+        # _append_resource_inner 在创建后通过 apply_substances 写入。
         init_new_res = initialize_resource(res_creation_input)  # flatten的格式
         if len(init_new_res) > 1:  # 一个物料，多个子节点
             init_new_res = [init_new_res]
@@ -1817,7 +1814,7 @@ class HostNode(BaseROS2DeviceNode):
         return res
 
     @action(always_free=True, node_type=NodeType.MANUAL_CONFIRM, placeholder_keys={
-        "assignee_user_ids": "unilabos_manual_confirm"
+        "assignee_user_ids": PLACEHOLDER_MANUAL_CONFIRM
     }, goal_default={
         "timeout_seconds": 3600,
         "assignee_user_ids": []
@@ -1828,6 +1825,113 @@ class HostNode(BaseROS2DeviceNode):
         修改的结果无效，是只读的
         """
         return kwargs
+
+    @action(
+        description="申请扣减物料并取出（接收服务端已扣减的单个根物料，校验+转换后输出）",
+        always_free=True,
+        placeholder_keys={"resource": PLACEHOLDER_DEDUCT_RESOURCE},
+        handles=[
+            ActionInputHandle(
+                key="resource",
+                data_type="resource",
+                label="扣减物料",
+                data_key="resource",
+                data_source=DataSource.HANDLE,
+            ),
+            ActionOutputHandle(
+                key="resource",
+                data_type="resource",
+                label="取出物料",
+                data_key="resource",
+                data_source=DataSource.EXECUTOR,
+            ),
+        ],
+    )
+    def apply_deduct_resource(self, resource: ResourceSlot) -> dict:
+        """
+        申请扣减物料并取出。
+
+        服务端已完成扣减并回传实际物料；本动作只做校验，并让物料走 unilab 资源转换后输出。
+        入参 uuid 由前端传入，框架在 send_goal 执行时已解析为单个 PLR 实例。
+        parent_uuid 保持为空即归属 host_node 自身，不在此挂载（物理落位交给后续 transfer）。
+
+        Args:
+            resource[扣减物料]: 已扣减的单个根物料（不是列表，框架已解析为实例）。
+            class_name[资源类型]: 资源注册表类型名（可选，用于标注/校验）。
+
+        Note:
+            返回的 resource 是 list[ResourceDict]（单个根物料的扁平节点列表），
+            不是 list[list[ResourceDict]]，因为只有一个根物料。
+        """
+        if resource is None:
+            raise ValueError("申请扣减失败：未接收到已扣减物料")
+        if getattr(resource, "unilabos_uuid", None) is None:
+            raise ValueError(f"物料 {getattr(resource, 'name', resource)} 缺少 unilabos_uuid，无法取出")
+        # 走 unilab 新转换：PLR 实例 -> ResourceTreeSet -> dump，单根取 [0]
+        dumped = ResourceTreeSet.from_plr_resources([resource]).dump()
+        tree: List[Dict[str, Any]] = dumped[0] if dumped else []
+        barcode = tree[0].get("barcode", "") if tree else ""
+        self.lab_logger().info(
+            f"[apply_deduct_resource] 取出物料 name={getattr(resource, 'name', '')} barcode={barcode}"
+        )
+        return {"resource": tree}
+
+    @action(
+        description="设置物料内容物（液体/固体，默认单位 微升/微克）；接收单个物料，设置后输出",
+        always_free=True,
+        placeholder_keys={"resource": PLACEHOLDER_RESOURCES},
+        handles=[
+            ActionInputHandle(
+                key="resource",
+                data_type="resource",
+                label="目标物料",
+                data_key="resource",
+                data_source=DataSource.HANDLE,
+            ),
+            ActionOutputHandle(
+                key="resource",
+                data_type="resource",
+                label="目标物料",
+                data_key="resource",
+                data_source=DataSource.EXECUTOR,
+            ),
+        ],
+    )
+    async def set_substance(
+        self,
+        resource: ResourceSlot,
+        substance_names: List[str],
+        amounts: List[float],
+        slots: List[str] = [],
+        is_solid: List[bool] = [],
+    ) -> dict:
+        """
+        设置单个物料的内容物（液体或固体）。
+
+        接收的物料必须是单个，且为以下之一：
+        - container：直接设置在自身的 tracker 上；
+        - well（带标号的容器）：同样设置在自身；
+        - carrier / plate 带 container：按 slots 设置在对应子容器的 tracker 上（支持 tracker 输入）。
+
+        设置目标只有两种：物料自身，或物料下面 children 的孔位。由 slots 区分（空=自身）。
+        单位固定默认：固体=微克(ug)、液体=微升(ul)，由 is_solid 区分（unilab 定制 PLR 的
+        set_liquids 仅支持 ul/ug）。底层走 set_liquids 三元组 (名称, 量, 单位)。
+
+        Args:
+            resource[目标物料]: 单个物料（container / well / 带子容器的 carrier|plate）。
+            substance_names[物质名称]: 每个目标的物质名（液体名或固体名）。
+            amounts[用量]: 每个目标的用量（液体=体积/微升，固体=质量/微克）。
+            slots[子孔位]: 子孔位 id/索引；为空=设在物料自身，非空=设在对应子容器。
+            is_solid[是否固体]: 每个目标是否固体（可选，缺省按液体处理；决定单位 ug/ul）。
+        """
+        if resource is None:
+            raise ValueError("设置内容物失败：未接收到物料")
+        # 统一走 apply_substances：目标解析 + ug/ul 单位 + set_liquids 三元组
+        apply_substances(resource, substance_names, amounts, slots=slots, is_solid=is_solid)
+        # 同步整棵树到云端（含被修改的子孔位）
+        await self.update_resource([resource])
+        dumped = ResourceTreeSet.from_plr_resources([resource]).dump()
+        return {"resource": dumped[0] if dumped else []}
 
     def test_resource(
         self,
