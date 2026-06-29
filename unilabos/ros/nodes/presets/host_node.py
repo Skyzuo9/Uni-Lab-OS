@@ -437,6 +437,9 @@ class HostNode(BaseROS2DeviceNode):
             # 将设备添加到当前设备集合
             device_key = f"{namespace}/{edge_device_id}"  # namespace已经包含device_id了，这里复写一遍
             current_devices.add(device_key)
+            # 幂等补建 ActionClient：图内设备/或 action server 晚于发现才起的设备，
+            # 首次发现时可能没建成 client；每轮补建(已存在会跳过),修复 cloud 下发 not found。
+            self._create_action_clients_for_device(device_id, namespace)
 
             # 如果是新设备，记录并创建ActionClient
             if edge_device_id not in self.devices_names:
@@ -521,6 +524,16 @@ class HostNode(BaseROS2DeviceNode):
                     # })
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
+        # 兜底:每个设备都有 _execute_driver_command(_async)(StrSingleInput)。
+        # get_action_server_names_and_types_by_node 在 host 视角/时序下可能查不到,直接按已知路径补建。
+        for _base in ("_execute_driver_command", "_execute_driver_command_async"):
+            _aid = f"{namespace}/{_base}"
+            if _aid not in self._action_clients:
+                try:
+                    self._action_clients[_aid] = ActionClient(self, StrSingleInput, _aid, callback_group=self.callback_group)
+                    self.lab_logger().info(f"[Host Node] Created base ActionClient: {_aid}")
+                except Exception as _e:
+                    self.lab_logger().error(f"[Host Node] Failed base ActionClient {_aid}: {_e}")
 
     async def create_resource_detailed(
         self,
@@ -663,6 +676,16 @@ class HostNode(BaseROS2DeviceNode):
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
         self._action_value_mappings[device_id] = d._ros_node._action_value_mappings
+        # cloud 下发 UniLabJsonCommandAsync 走通用 _execute_driver_command_async(StrSingleInput),
+        # 它不在 action_value_mappings 里;本设备其余动作均为 UniLabJsonCommand 被下方 skip,故在此显式建基础 client。
+        for _base in ("_execute_driver_command", "_execute_driver_command_async"):
+            _aid = f"/devices/{device_id}/{_base}"
+            if _aid not in self._action_clients:
+                try:
+                    self._action_clients[_aid] = ActionClient(self, StrSingleInput, _aid)
+                    self.lab_logger().info(f"[Host Node] Created base ActionClient (Local): {_aid}")
+                except Exception as _e:
+                    self.lab_logger().error(f"[Host Node] Failed base ActionClient {_aid}: {_e}")
         # noinspection PyProtectedMember
         for action_name, action_value_mapping in d._ros_node._action_value_mappings.items():
             if action_name.startswith("auto-") or str(action_value_mapping.get("type", "")).startswith(
