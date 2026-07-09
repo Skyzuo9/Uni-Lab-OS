@@ -1,4 +1,8 @@
 pairs:
+  - real: incubator.liconic_stx110
+    virtual: liconic_stx110_rviz
+    twin_observed: [carousel_angle, temperature, status]
+    twin_throttle_hz: 5
   - real: heaterstirrer.dalong
     virtual: virtual_heatchill
     twin_observed: [temperature, rpm, status]
