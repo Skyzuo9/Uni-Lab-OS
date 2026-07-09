@@ -1,0 +1,3026 @@
+{
+  "workflow_uuid": "5f0f1c32-a690-4490-aa46-5ebc6438d60f",
+  "workflow_name": "噬菌体展示全流程v8-单Vantage经济版",
+  "description": "v8: 单台Vantage串行完成所有液体处理 | 保留FANOUT-2(FACS/ELISA/Sanger验证并行) | 移除FANOUT-0(三Vantage)和FANOUT-3(双BioXp/AKTA) | 设备总数从18台减至13台",
+  "tags": [
+    "phage_display",
+    "v8",
+    "single-vantage",
+    "economical"
+  ],
+  "nodes": [
+    {
+      "uuid": "2955705c-23bf-41b7-ba0c-f3e208861352",
+      "name": "Step1-1 阳性细胞吸PBS",
+      "description": "Vantage 吸1mL PBS到阳性细胞管",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "name": "Step1-2 阴性细胞吸PBS",
+      "description": "Vantage 吸1mL PBS到阴性细胞管",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "bdb4d3df-6c97-4c49-843f-3c6ff35852b7",
+      "name": "Step1-6 噬菌体加BSA",
+      "description": "Vantage 向噬菌体管加BSA封闭剂",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "fdd526de-cc15-498d-9bc3-6c01946ebd58",
+      "name": "S1.c-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/phage_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "564df42f-ce0e-45de-8bf9-e50e5da2643e",
+      "name": "S1.c-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/phage_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "3ed4d09b-c0d0-418d-bff2-4a228ffebdb1",
+      "name": "Step1-7 噬菌体预封闭15min",
+      "description": "Cytomat 噬菌体预封闭15min",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 4,
+        "duration": 900
+      }
+    },
+    {
+      "uuid": "2b0fde43-d1e2-4ba7-a049-bbd7b5214d64",
+      "name": "S1.3-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "2188dc8d-aefa-4ff8-a0f8-9d2f1e02b9b7",
+      "name": "S1.3-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "6f5a12d9-046e-412c-80f8-39bfb929fdac",
+      "name": "Step1-3 离心500xg 配平",
+      "description": "阳性+阴性细胞配平离心500xg 5min",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 500,
+        "duration": 300
+      }
+    },
+    {
+      "uuid": "4d86627b-a6f9-427c-b47a-3a9e78055c53",
+      "name": "S1.4-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "7b8b819d-396d-4eff-9e0e-a8c13639f00e",
+      "name": "S1.4-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "fee7cc70-2e95-4c37-8ab2-463a77a6ed00",
+      "name": "Step1-4 细胞入Cytomat封闭",
+      "description": "加BSA后载入Cytomat封闭位",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-shovel_in",
+      "lab_node_type": "Device",
+      "footer": "auto-shovel_in-cytomat_backend",
+      "param": {}
+    },
+    {
+      "uuid": "447a5ccf-aff5-44c1-8796-adc93ebfd2cb",
+      "name": "Step1-5 细胞封闭25min",
+      "description": "Cytomat 阳性阴性细胞封闭25min",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 1500
+      }
+    },
+    {
+      "uuid": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "name": "S1.8-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "17d8549c-08a6-4b43-9364-ff5359c11d7a",
+      "name": "S1.8-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "93c5b174-3c8f-43f4-9f06-f7a8d66b31a4",
+      "name": "Step1-8 离心弃上清加BSA",
+      "description": "500xg离心弃上清加BSA重悬",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 500,
+        "duration": 300
+      }
+    },
+    {
+      "uuid": "9ae2aed2-b12c-4852-9d73-1a46c97d229f",
+      "name": "S1.9-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "8c2a2263-fc29-4e7e-bc6e-529653ad7b2d",
+      "name": "S1.9-ARM-place",
+      "description": "机械臂将物料放入 vantage_worktable",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/cell_tube_rack",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "name": "Step1-9 BSA重悬细胞",
+      "description": "Vantage 加BSA重悬细胞备用",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "name": "Step1-9 BSA重悬细胞",
+      "description": "Vantage 加BSA重悬细胞备用",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "a77b2bcc-018b-44ce-a77d-8fcbec344cbc",
+      "name": "Step2-1 噬菌体加入阴性细胞",
+      "description": "Vantage 加噬菌体到阴性细胞",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "ae04248a-e13c-4b40-81db-a1bbb3800e07",
+      "name": "S2.2-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "02e84013-f4fe-4af8-b21d-d6ecb5f51cec",
+      "name": "S2.2-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "8ad861ab-5943-45da-a633-a6a484671dc2",
+      "name": "Step2-2 阴性孵育入Cytomat",
+      "description": "阴性筛选板载入Cytomat",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-shovel_in",
+      "lab_node_type": "Device",
+      "footer": "auto-shovel_in-cytomat_backend",
+      "param": {}
+    },
+    {
+      "uuid": "b0495823-0017-48fe-8fb4-0b3ee1488ba3",
+      "name": "Step2-3 阴性孵育45min",
+      "description": "Cytomat 45min振荡孵育",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 2700
+      }
+    },
+    {
+      "uuid": "61312558-ebe8-4f7e-9c24-c17c62068e78",
+      "name": "Step2-4 取出阴性孵育板",
+      "description": "从Cytomat取出阴性板",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-shovel_out",
+      "lab_node_type": "Device",
+      "footer": "auto-shovel_out-cytomat_backend",
+      "param": {}
+    },
+    {
+      "uuid": "b88bbbea-8cc6-4395-a0be-59a88ddb2bc3",
+      "name": "S2.5-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "c3752290-3c7b-4ebe-bd29-3248ae371a66",
+      "name": "S2.5-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "7de1cd32-5162-4668-bc85-415da3195a7f",
+      "name": "Step2-5 离心收上清",
+      "description": "500xg 5min离心收噬菌体上清",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 500,
+        "duration": 300
+      }
+    },
+    {
+      "uuid": "d24a52ae-5fe1-4ac7-bf4f-14948d67e29a",
+      "name": "S2.6-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "36ee9ccf-eed0-4d99-9467-0a770544edfe",
+      "name": "S2.6-ARM-place",
+      "description": "机械臂将物料放入 vantage_worktable",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/neg_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "name": "Step2-6 吸取上清液",
+      "description": "Vantage 吸取阴性筛选后上清",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "name": "Step2-6 吸取上清液",
+      "description": "Vantage 吸取阴性筛选后上清",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "630db65b-fd72-43b6-8bfe-28b1586f594e",
+      "name": "Step3-1 噬菌体加入阳性细胞",
+      "description": "Vantage 将阴性上清加入阳性细胞",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "f6aa1ce1-5760-45de-aae3-f7222a6598a2",
+      "name": "S3.2-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "b2d635a8-dae1-4003-ac62-f395922e65d2",
+      "name": "S3.2-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "3a0e76dc-e293-4c0c-8e3f-f1cd708833d3",
+      "name": "Step3-2 阳性孵育入Cytomat",
+      "description": "阳性筛选板载入Cytomat",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-shovel_in",
+      "lab_node_type": "Device",
+      "footer": "auto-shovel_in-cytomat_backend",
+      "param": {}
+    },
+    {
+      "uuid": "57b2a573-3d94-4d33-bcae-360e6c5fc250",
+      "name": "Step3-3 阳性孵育2h",
+      "description": "Cytomat 2h振荡孵育",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 7200
+      }
+    },
+    {
+      "uuid": "8f90c29a-7786-4456-a74e-db3a1180cde4",
+      "name": "Step3-4 取出阳性孵育板",
+      "description": "从Cytomat取出阳性板",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-shovel_out",
+      "lab_node_type": "Device",
+      "footer": "auto-shovel_out-cytomat_backend",
+      "param": {}
+    },
+    {
+      "uuid": "69623ccc-b0d9-407c-86a2-3438cd2ac721",
+      "name": "S3.5-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "2dfed3c2-d71c-4b70-85af-cd8782515b89",
+      "name": "S3.5-ARM-place",
+      "description": "机械臂将物料放入 agilent_biotek_406_fx",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "agilent_biotek_406_fx",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "77c4fec7-bec7-46cf-b68a-c12622a8556d",
+      "name": "Step3-5 PBS洗涤3次",
+      "description": "BioTek洗板机PBS洗涤3次",
+      "resource_name": "agilent_biotek_406_fx",
+      "device_id": "agilent_biotek_406_fx",
+      "template_name": "wash_plate",
+      "lab_node_type": "Device",
+      "footer": "wash_plate-agilent_biotek_406_fx",
+      "param": {
+        "cycles": 3,
+        "volume": 300
+      }
+    },
+    {
+      "uuid": "3040d3de-c00d-4d7f-be1a-1c6012625329",
+      "name": "S3.6-ARM-pick",
+      "description": "机械臂从 agilent_biotek_406_fx 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "agilent_biotek_406_fx",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "d1110750-e585-41a4-adfc-31cf73b2ad1b",
+      "name": "S3.6-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "ce0115ed-d139-42cc-9d54-75700a4fe4ad",
+      "name": "Step3-6 离心弃上清",
+      "description": "500xg离心弃洗涤液",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 500,
+        "duration": 300
+      }
+    },
+    {
+      "uuid": "2c87161d-6466-41da-a846-6d77651993d5",
+      "name": "S3.7-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "df58b2d1-668b-4fd8-a351-1ab5f2326bd8",
+      "name": "S3.7-ARM-place",
+      "description": "机械臂将物料放入 vantage_worktable",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/pos_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "name": "Step3-7 PBS重悬备用",
+      "description": "Vantage 加PBS重悬阳性细胞",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "name": "Step3-7 PBS重悬备用",
+      "description": "Vantage 加PBS重悬阳性细胞",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "b4f66bd1-8fb7-4e64-bb18-768e6d4b4799",
+      "name": "Step4-1 加PE荧光抗体",
+      "description": "Vantage 加10µL PE标记抗体",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "ebacc095-85f7-4dad-b462-209d24082749",
+      "name": "S4.2-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "91e56b07-3063-43d4-abf1-31eeeb4ee993",
+      "name": "S4.2-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "3805838e-8cd4-4984-b805-f05f6146f5b2",
+      "name": "Step4-2 避光4°C孵育30min",
+      "description": "Cytomat 避光低温孵育30min",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 4,
+        "duration": 1800
+      }
+    },
+    {
+      "uuid": "b99ba92f-c464-4213-8653-a6b4f579dc26",
+      "name": "S4.3-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "813619eb-428a-4f9d-9fa1-6aa5b79716cc",
+      "name": "S4.3-ARM-place",
+      "description": "机械臂将物料放入 agilent_biotek_406_fx",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "agilent_biotek_406_fx",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "6e1149dc-0d33-41da-b1ec-defc14cdd834",
+      "name": "Step4-3 洗涤去余量抗体",
+      "description": "BioTek洗板去除多余荧光抗体",
+      "resource_name": "agilent_biotek_406_fx",
+      "device_id": "agilent_biotek_406_fx",
+      "template_name": "wash_plate",
+      "lab_node_type": "Device",
+      "footer": "wash_plate-agilent_biotek_406_fx",
+      "param": {
+        "cycles": 2,
+        "volume": 300
+      }
+    },
+    {
+      "uuid": "78064ada-962e-4e33-a9e8-4a7471b5fdf9",
+      "name": "S4.4-ARM-pick",
+      "description": "机械臂从 agilent_biotek_406_fx 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "agilent_biotek_406_fx",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "e5fd60d1-bb42-4d9c-bdf3-7fd503b503f4",
+      "name": "S4.4-ARM-place",
+      "description": "机械臂将物料放入 vantage_worktable",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/stain_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "name": "Step4-4 PBS重悬转移流式管",
+      "description": "Vantage 重悬并转移至流式管",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "name": "Step4-4 PBS重悬转移流式管",
+      "description": "Vantage 重悬并转移至流式管",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "457e5365-80f0-429f-a88a-0c9f785049f9",
+      "name": "S5.1-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "3ac40770-574a-4a88-b1cd-b89a72c808de",
+      "name": "S5.1-ARM-place",
+      "description": "机械臂将物料放入 bd_facsmelody",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "bd_facsmelody",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "74c0099c-823a-44da-9884-c0b3047b8bf1",
+      "name": "Step5-1 初始化FACSMelody",
+      "description": "启动FACSMelody并自检",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "initialize_instrument",
+      "lab_node_type": "Device",
+      "footer": "initialize_instrument-bd_facsmelody",
+      "param": {}
+    },
+    {
+      "uuid": "fd27e76b-b0ed-4063-b0bf-9f73ccb022c2",
+      "name": "Step5-2 设置FSC/SSC+PE门",
+      "description": "设置细胞分选门控策略",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "set_gate",
+      "lab_node_type": "Device",
+      "footer": "set_gate-bd_facsmelody",
+      "param": {
+        "channel": "PE"
+      }
+    },
+    {
+      "uuid": "2767439b-604e-48df-97c2-ada207063789",
+      "name": "Step5-3 FACS分选高亲和力",
+      "description": "分选PE+高亲和力阳性细胞",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "sort_cells",
+      "lab_node_type": "Device",
+      "footer": "sort_cells-bd_facsmelody",
+      "param": {
+        "target_count": 10000
+      }
+    },
+    {
+      "uuid": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "name": "Step5-4 导出FACS数据",
+      "description": "导出分选数据报告",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "export_run_data",
+      "lab_node_type": "Device",
+      "footer": "export_run_data-bd_facsmelody",
+      "param": {}
+    },
+    {
+      "uuid": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "name": "Step5-4 导出FACS数据",
+      "description": "导出分选数据报告",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "export_run_data",
+      "lab_node_type": "Device",
+      "footer": "export_run_data-bd_facsmelody",
+      "param": {}
+    },
+    {
+      "uuid": "c49e5fb0-8325-497d-abb9-c0d56a0709b9",
+      "name": "S6.1-ARM-pick",
+      "description": "机械臂从 bd_facsmelody 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "bd_facsmelody",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "eef22089-0a9d-43fc-80f7-f2c128ac6249",
+      "name": "S6.1-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "6d1ca769-bd44-4f3f-8c55-8ada2ac6f607",
+      "name": "Step6-1 分选后离心500xg",
+      "description": "分选后快速离心浓缩细胞",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 500,
+        "duration": 300
+      }
+    },
+    {
+      "uuid": "69829dae-bfbe-457e-bb17-144b764c4e1a",
+      "name": "S6.2-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "04c9cc2e-b72a-4dda-b333-70c6ed189715",
+      "name": "S6.2-ARM-place",
+      "description": "机械臂将物料放入 vantage_worktable",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/facs_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "d7559620-921f-4c42-a396-a6cb8e2bbdee",
+      "name": "Step6-2 酸洗脱500µL",
+      "description": "Vantage 0.2M Glycine pH2.2洗脱",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "f15acc81-64bb-4966-93ab-94a17b06e246",
+      "name": "Step6-3 中和50µL Tris-HCl",
+      "description": "Vantage 加Tris-HCl pH9中和",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-dispense",
+      "lab_node_type": "Device",
+      "footer": "auto-dispense-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "8db7b120-2684-47af-8b92-a915fdcbfb2b",
+      "name": "S6.4-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/elution_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "caaea882-0d2d-42e6-8693-82ae5a98f835",
+      "name": "S6.4-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/elution_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "5e361761-c327-4033-b245-c7c252686628",
+      "name": "Step6-4 4°C感染E.coli 30min",
+      "description": "Cytomat 噬菌体感染TG1大肠杆菌",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 4,
+        "duration": 1800
+      }
+    },
+    {
+      "uuid": "3ec40cc7-42d4-4cea-9555-0e9547ec20fc",
+      "name": "Step6-5 37°C扩增1h",
+      "description": "Cytomat 37°C振荡扩增1h",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 3600
+      }
+    },
+    {
+      "uuid": "965a8356-4c71-44f2-affc-dffe25ceff7c",
+      "name": "Step6-6 LB扩增培养16h",
+      "description": "Cytomat LB培养基37°C过夜16h",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 57600
+      }
+    },
+    {
+      "uuid": "5f78ada4-4acf-4444-aa9e-a76c8e8dbd00",
+      "name": "S6.7-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/culture_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "2866b5af-7f23-43ac-a18b-070a9503a2cf",
+      "name": "S6.7-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/culture_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "7b01eff8-258b-46f6-8e23-2e5a568a2947",
+      "name": "Step6-7 高速离心6000xg",
+      "description": "6000xg 15min去除菌体",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 6000,
+        "duration": 900
+      }
+    },
+    {
+      "uuid": "57621609-c39b-407f-9075-2d58bf841378",
+      "name": "S6.8-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/culture_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "d9507054-df5d-4019-b483-bd3d7634fa59",
+      "name": "S6.8-ARM-place",
+      "description": "机械臂将物料放入 tecan_resolvex_a200",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "tecan_resolvex_a200",
+        "resource": "/lab/culture_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "name": "Step6-8 无菌过滤0.22µm",
+      "description": "Tecan 0.22µm无菌过滤",
+      "resource_name": "tecan_resolvex_a200",
+      "device_id": "tecan_resolvex_a200",
+      "template_name": "filter_samples",
+      "lab_node_type": "Device",
+      "footer": "filter_samples-tecan_resolvex_a200",
+      "param": {}
+    },
+    {
+      "uuid": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "name": "Step6-8 无菌过滤0.22µm",
+      "description": "Tecan 0.22µm无菌过滤",
+      "resource_name": "tecan_resolvex_a200",
+      "device_id": "tecan_resolvex_a200",
+      "template_name": "filter_samples",
+      "lab_node_type": "Device",
+      "footer": "filter_samples-tecan_resolvex_a200",
+      "param": {}
+    },
+    {
+      "uuid": "12a98915-a041-4cde-88d9-72a14fdeefab",
+      "name": "S7.1-ARM-pick",
+      "description": "机械臂从 tecan_resolvex_a200 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "tecan_resolvex_a200",
+        "resource": "/lab/plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "131d39a1-bbc5-46c9-8367-d4f69858a643",
+      "name": "S7.1-ARM-place",
+      "description": "机械臂将物料放入 molecular_devices_qpix_420",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "molecular_devices_qpix_420",
+        "resource": "/lab/plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "1bcc1440-47a9-4909-8833-8e5c9be83518",
+      "name": "Step7-1 QPix拍摄平板",
+      "description": "QPix 420成像细菌平板",
+      "resource_name": "molecular_devices_qpix_420",
+      "device_id": "molecular_devices_qpix_420",
+      "template_name": "image_plate",
+      "lab_node_type": "Device",
+      "footer": "image_plate-molecular_devices_qpix_420",
+      "param": {}
+    },
+    {
+      "uuid": "d64649a9-1bf9-4610-8cb3-20f77b970e0e",
+      "name": "Step7-2 选择30-50单克隆",
+      "description": "AI算法选择形态正常单克隆",
+      "resource_name": "molecular_devices_qpix_420",
+      "device_id": "molecular_devices_qpix_420",
+      "template_name": "select_colonies",
+      "lab_node_type": "Device",
+      "footer": "select_colonies-molecular_devices_qpix_420",
+      "param": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    {
+      "uuid": "2ac50468-a02a-417d-9536-2b42279c1f1b",
+      "name": "Step7-3 挑选克隆至96孔板",
+      "description": "机械手挑选单克隆至96孔板",
+      "resource_name": "molecular_devices_qpix_420",
+      "device_id": "molecular_devices_qpix_420",
+      "template_name": "pick_colonies",
+      "lab_node_type": "Device",
+      "footer": "pick_colonies-molecular_devices_qpix_420",
+      "param": {
+        "target_plate": "96well"
+      }
+    },
+    {
+      "uuid": "cdbd5472-9937-4130-aea3-10415badf929",
+      "name": "S7.4-ARM-pick",
+      "description": "机械臂从 molecular_devices_qpix_420 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "molecular_devices_qpix_420",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "105eab50-427d-45d9-a769-df5a53f3cc96",
+      "name": "S7.4-ARM-place",
+      "description": "机械臂将物料放入 cytomat_backend",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "name": "Step7-4 96孔板克隆过夜培养",
+      "description": "Cytomat 37°C克隆过夜培养",
+      "resource_name": "cytomat_backend",
+      "device_id": "cytomat_backend",
+      "template_name": "auto-set_temperature",
+      "lab_node_type": "Device",
+      "footer": "auto-set_temperature-cytomat_backend",
+      "param": {
+        "temperature": 37,
+        "duration": 57600
+      }
+    },
+    {
+      "uuid": "4c2913aa-c58f-4134-849a-47f54a4f7fba",
+      "name": "S7a.1-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "a8951279-6aee-40f0-97c1-a831a3e404f9",
+      "name": "S7a.1-ARM-place",
+      "description": "机械臂将物料放入 bd_facsmelody",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "bd_facsmelody",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "a2ae4ab7-0825-48e5-9c70-c617e3669507",
+      "name": "Step7-5a 克隆流式验证",
+      "description": "FACSMelody检测各克隆PE荧光强度",
+      "resource_name": "bd_facsmelody",
+      "device_id": "bd_facsmelody",
+      "template_name": "analyze_sample",
+      "lab_node_type": "Device",
+      "footer": "analyze_sample-bd_facsmelody",
+      "param": {}
+    },
+    {
+      "uuid": "2d6c0729-8ddc-4a44-8b7b-eeb833dcf116",
+      "name": "S7b.1-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "d9fd57f9-9155-4f22-8926-00a0f9a0d015",
+      "name": "S7b.1-ARM-place",
+      "description": "机械臂将物料放入 agilent_biotek_406_fx",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "agilent_biotek_406_fx",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "5a05d4ac-e477-4d7f-b4f3-a2b0a08686e5",
+      "name": "Step7-5b ELISA洗板检测",
+      "description": "BioTek ELISA检测抗原结合活性",
+      "resource_name": "agilent_biotek_406_fx",
+      "device_id": "agilent_biotek_406_fx",
+      "template_name": "wash_plate",
+      "lab_node_type": "Device",
+      "footer": "wash_plate-agilent_biotek_406_fx",
+      "param": {
+        "cycles": 3
+      }
+    },
+    {
+      "uuid": "7d4905f1-7ff7-4072-9b17-95b09b516b9d",
+      "name": "S7c.1-ARM-pick",
+      "description": "机械臂从 cytomat_backend 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytomat_backend",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "d70aceb0-76d6-4209-9ebe-e3c6bc2df6f4",
+      "name": "S7c.1-ARM-place",
+      "description": "机械臂将物料放入 qiagen_qiacube_connect",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "qiagen_qiacube_connect",
+        "resource": "/lab/96well_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "bf43d15a-e6f4-44dd-955f-7aa13bfa412a",
+      "name": "Step7-5c 质粒提取",
+      "description": "QiaCube提取阳性克隆质粒DNA",
+      "resource_name": "qiagen_qiacube_connect",
+      "device_id": "qiagen_qiacube_connect",
+      "template_name": "run_plasmid_prep",
+      "lab_node_type": "Device",
+      "footer": "run_plasmid_prep-qiagen_qiacube_connect",
+      "param": {}
+    },
+    {
+      "uuid": "d54fce1c-654a-4ad9-9adb-45871b84d6ce",
+      "name": "S7c.2-ARM-pick",
+      "description": "机械臂从 qiagen_qiacube_connect 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "qiagen_qiacube_connect",
+        "resource": "/lab/seq_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "e1bf9099-7111-4739-ab63-fdf678ff0dd7",
+      "name": "S7c.2-ARM-place",
+      "description": "机械臂将物料放入 applied_biosystems_seqstudio_genetic_analyzer",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "applied_biosystems_seqstudio_genetic_analyzer",
+        "resource": "/lab/seq_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "e32959cf-333f-4272-ad2b-e093e1daabb0",
+      "name": "Step7-5c Sanger测序",
+      "description": "SeqStudio对阳性克隆Sanger测序",
+      "resource_name": "applied_biosystems_seqstudio_genetic_analyzer",
+      "device_id": "applied_biosystems_seqstudio_genetic_analyzer",
+      "template_name": "start_sanger_run",
+      "lab_node_type": "Device",
+      "footer": "start_sanger_run-applied_biosystems_seqstudio_genetic_analyzer",
+      "param": {}
+    },
+    {
+      "uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "name": "Step8-0 筛选阳性克隆汇合",
+      "description": "汇合流式/ELISA/测序结果选择阳性克隆",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "name": "Step8-0 筛选阳性克隆汇合",
+      "description": "汇合流式/ELISA/测序结果选择阳性克隆",
+      "resource_name": "vantage_backend",
+      "device_id": "vantage_backend",
+      "template_name": "auto-aspirate",
+      "lab_node_type": "Device",
+      "footer": "auto-aspirate-vantage_backend",
+      "param": {}
+    },
+    {
+      "uuid": "cf117520-7aa1-4f2a-b198-ac1bec69ee06",
+      "name": "S8.1-ARM-pick",
+      "description": "机械臂从 vantage_worktable 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "vantage_worktable",
+        "resource": "/lab/dna_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "dc4c5a0e-7b64-4405-b60f-e704d00fedeb",
+      "name": "S8.1-ARM-place",
+      "description": "机械臂将物料放入 telesis_bio_bioxp_3250",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "telesis_bio_bioxp_3250",
+        "resource": "/lab/dna_plate",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "9407474f-b502-4f00-ae43-af6c5a3faa49",
+      "name": "Step8-1 BioXp基因组装",
+      "description": "BioXp体外组装基因表达载体",
+      "resource_name": "telesis_bio_bioxp_3250",
+      "device_id": "telesis_bio_bioxp_3250",
+      "template_name": "assemble_vector",
+      "lab_node_type": "Device",
+      "footer": "assemble_vector-telesis_bio_bioxp_3250",
+      "param": {}
+    },
+    {
+      "uuid": "9bf06d0d-a23d-48a9-a369-b0e7e3c3e77a",
+      "name": "Step8-2 BioXp转化",
+      "description": "BioXp转化至表达菌株BL21",
+      "resource_name": "telesis_bio_bioxp_3250",
+      "device_id": "telesis_bio_bioxp_3250",
+      "template_name": "transform_cells",
+      "lab_node_type": "Device",
+      "footer": "transform_cells-telesis_bio_bioxp_3250",
+      "param": {}
+    },
+    {
+      "uuid": "0615f61e-44c0-4319-988b-c8a15a39e51d",
+      "name": "S8.3-ARM-pick",
+      "description": "机械臂从 telesis_bio_bioxp_3250 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "telesis_bio_bioxp_3250",
+        "resource": "/lab/tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "7ed72933-5208-43df-926a-da04ed62b84c",
+      "name": "S8.3-ARM-place",
+      "description": "机械臂将物料放入 hettich_rotanta_460_robotic",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "efc77e49-e7f4-406d-b1a6-d515d3d84abf",
+      "name": "Step8-3 高速离心澄清",
+      "description": "高速离心澄清裂解液",
+      "resource_name": "hettich_rotanta_460_robotic",
+      "device_id": "hettich_rotanta_460_robotic",
+      "template_name": "spin_samples",
+      "lab_node_type": "Device",
+      "footer": "spin_samples-hettich_rotanta_460_robotic",
+      "param": {
+        "speed": 12000,
+        "duration": 900
+      }
+    },
+    {
+      "uuid": "41601da8-3cea-4aec-be23-593e04c8ce23",
+      "name": "S8.4-ARM-pick",
+      "description": "机械臂从 hettich_rotanta_460_robotic 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "hettich_rotanta_460_robotic",
+        "resource": "/lab/protein",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "be1f50f4-9dc4-4f2c-97e7-e319d4c713ec",
+      "name": "S8.4-ARM-place",
+      "description": "机械臂将物料放入 cytiva_akta_pure",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytiva_akta_pure",
+        "resource": "/lab/protein",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "c88318d9-f0c3-4c1f-b3f8-1e6b6bbbc60a",
+      "name": "Step8-4 AKTA亲和层析纯化",
+      "description": "AKTA亲和层析纯化目标蛋白",
+      "resource_name": "cytiva_akta_pure",
+      "device_id": "cytiva_akta_pure",
+      "template_name": "load_sample",
+      "lab_node_type": "Device",
+      "footer": "load_sample-cytiva_akta_pure",
+      "param": {}
+    },
+    {
+      "uuid": "2e855e12-e832-4790-ac7a-811337a88eb7",
+      "name": "S8.5-ARM-pick",
+      "description": "机械臂从 cytiva_akta_pure 取出",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "pick",
+        "move_group": "arm",
+        "status": "cytiva_akta_pure",
+        "resource": "/lab/protein_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "b9716a8b-47e6-46b7-a872-b3b0721ce8a7",
+      "name": "S8.5-ARM-place",
+      "description": "机械臂将物料放入 cytiva_biacore_8k_plus",
+      "resource_name": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "device_id": "robotic_arm.SCARA_with_slider.moveit.virtual",
+      "template_name": "pick_and_place",
+      "lab_node_type": "Device",
+      "footer": "pick_and_place-robotic_arm.SCARA_with_slider.moveit.virtual",
+      "param": {
+        "option": "place",
+        "move_group": "arm",
+        "status": "cytiva_biacore_8k_plus",
+        "resource": "/lab/protein_tube",
+        "speed": 0.5,
+        "retry": 3
+      }
+    },
+    {
+      "uuid": "04a38a36-2479-451c-a7ee-b5e0288a7bee",
+      "name": "Step8-5 Biacore SPR亲和力",
+      "description": "Biacore 8K+ 8通道同时测定KD值",
+      "resource_name": "cytiva_biacore_8k_plus",
+      "device_id": "cytiva_biacore_8k_plus",
+      "template_name": "measure_binding",
+      "lab_node_type": "Device",
+      "footer": "measure_binding-cytiva_biacore_8k_plus",
+      "param": {}
+    },
+    {
+      "uuid": "2ef89f6a-97fb-4b51-bd5f-dace9b8da268",
+      "name": "Step8-6 特异性交叉验证",
+      "description": "Biacore交叉反应性验证特异性",
+      "resource_name": "cytiva_biacore_8k_plus",
+      "device_id": "cytiva_biacore_8k_plus",
+      "template_name": "compare_specificity_panel",
+      "lab_node_type": "Device",
+      "footer": "compare_specificity_panel-cytiva_biacore_8k_plus",
+      "param": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "2955705c-23bf-41b7-ba0c-f3e208861352",
+      "target": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "source_node_uuid": "2955705c-23bf-41b7-ba0c-f3e208861352",
+      "target_node_uuid": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "target": "bdb4d3df-6c97-4c49-843f-3c6ff35852b7",
+      "source_node_uuid": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "target_node_uuid": "bdb4d3df-6c97-4c49-843f-3c6ff35852b7",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "bdb4d3df-6c97-4c49-843f-3c6ff35852b7",
+      "target": "fdd526de-cc15-498d-9bc3-6c01946ebd58",
+      "source_node_uuid": "bdb4d3df-6c97-4c49-843f-3c6ff35852b7",
+      "target_node_uuid": "fdd526de-cc15-498d-9bc3-6c01946ebd58",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "fdd526de-cc15-498d-9bc3-6c01946ebd58",
+      "target": "564df42f-ce0e-45de-8bf9-e50e5da2643e",
+      "source_node_uuid": "fdd526de-cc15-498d-9bc3-6c01946ebd58",
+      "target_node_uuid": "564df42f-ce0e-45de-8bf9-e50e5da2643e",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "564df42f-ce0e-45de-8bf9-e50e5da2643e",
+      "target": "3ed4d09b-c0d0-418d-bff2-4a228ffebdb1",
+      "source_node_uuid": "564df42f-ce0e-45de-8bf9-e50e5da2643e",
+      "target_node_uuid": "3ed4d09b-c0d0-418d-bff2-4a228ffebdb1",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "target": "2b0fde43-d1e2-4ba7-a049-bbd7b5214d64",
+      "source_node_uuid": "9cb15e7e-c4fe-4ae7-ae13-02c1c731a79a",
+      "target_node_uuid": "2b0fde43-d1e2-4ba7-a049-bbd7b5214d64",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2b0fde43-d1e2-4ba7-a049-bbd7b5214d64",
+      "target": "2188dc8d-aefa-4ff8-a0f8-9d2f1e02b9b7",
+      "source_node_uuid": "2b0fde43-d1e2-4ba7-a049-bbd7b5214d64",
+      "target_node_uuid": "2188dc8d-aefa-4ff8-a0f8-9d2f1e02b9b7",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2188dc8d-aefa-4ff8-a0f8-9d2f1e02b9b7",
+      "target": "6f5a12d9-046e-412c-80f8-39bfb929fdac",
+      "source_node_uuid": "2188dc8d-aefa-4ff8-a0f8-9d2f1e02b9b7",
+      "target_node_uuid": "6f5a12d9-046e-412c-80f8-39bfb929fdac",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "6f5a12d9-046e-412c-80f8-39bfb929fdac",
+      "target": "4d86627b-a6f9-427c-b47a-3a9e78055c53",
+      "source_node_uuid": "6f5a12d9-046e-412c-80f8-39bfb929fdac",
+      "target_node_uuid": "4d86627b-a6f9-427c-b47a-3a9e78055c53",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "4d86627b-a6f9-427c-b47a-3a9e78055c53",
+      "target": "7b8b819d-396d-4eff-9e0e-a8c13639f00e",
+      "source_node_uuid": "4d86627b-a6f9-427c-b47a-3a9e78055c53",
+      "target_node_uuid": "7b8b819d-396d-4eff-9e0e-a8c13639f00e",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "7b8b819d-396d-4eff-9e0e-a8c13639f00e",
+      "target": "fee7cc70-2e95-4c37-8ab2-463a77a6ed00",
+      "source_node_uuid": "7b8b819d-396d-4eff-9e0e-a8c13639f00e",
+      "target_node_uuid": "fee7cc70-2e95-4c37-8ab2-463a77a6ed00",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "fee7cc70-2e95-4c37-8ab2-463a77a6ed00",
+      "target": "447a5ccf-aff5-44c1-8796-adc93ebfd2cb",
+      "source_node_uuid": "fee7cc70-2e95-4c37-8ab2-463a77a6ed00",
+      "target_node_uuid": "447a5ccf-aff5-44c1-8796-adc93ebfd2cb",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "447a5ccf-aff5-44c1-8796-adc93ebfd2cb",
+      "target": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "source_node_uuid": "447a5ccf-aff5-44c1-8796-adc93ebfd2cb",
+      "target_node_uuid": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3ed4d09b-c0d0-418d-bff2-4a228ffebdb1",
+      "target": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "source_node_uuid": "3ed4d09b-c0d0-418d-bff2-4a228ffebdb1",
+      "target_node_uuid": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "target": "17d8549c-08a6-4b43-9364-ff5359c11d7a",
+      "source_node_uuid": "fffdac49-3ff0-4f02-b897-0fb9ef100e03",
+      "target_node_uuid": "17d8549c-08a6-4b43-9364-ff5359c11d7a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "17d8549c-08a6-4b43-9364-ff5359c11d7a",
+      "target": "93c5b174-3c8f-43f4-9f06-f7a8d66b31a4",
+      "source_node_uuid": "17d8549c-08a6-4b43-9364-ff5359c11d7a",
+      "target_node_uuid": "93c5b174-3c8f-43f4-9f06-f7a8d66b31a4",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "93c5b174-3c8f-43f4-9f06-f7a8d66b31a4",
+      "target": "9ae2aed2-b12c-4852-9d73-1a46c97d229f",
+      "source_node_uuid": "93c5b174-3c8f-43f4-9f06-f7a8d66b31a4",
+      "target_node_uuid": "9ae2aed2-b12c-4852-9d73-1a46c97d229f",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "9ae2aed2-b12c-4852-9d73-1a46c97d229f",
+      "target": "8c2a2263-fc29-4e7e-bc6e-529653ad7b2d",
+      "source_node_uuid": "9ae2aed2-b12c-4852-9d73-1a46c97d229f",
+      "target_node_uuid": "8c2a2263-fc29-4e7e-bc6e-529653ad7b2d",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "8c2a2263-fc29-4e7e-bc6e-529653ad7b2d",
+      "target": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "source_node_uuid": "8c2a2263-fc29-4e7e-bc6e-529653ad7b2d",
+      "target_node_uuid": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "target": "a77b2bcc-018b-44ce-a77d-8fcbec344cbc",
+      "source_node_uuid": "f0f8600c-76c0-46de-bbff-de3c1beab23e",
+      "target_node_uuid": "a77b2bcc-018b-44ce-a77d-8fcbec344cbc",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "a77b2bcc-018b-44ce-a77d-8fcbec344cbc",
+      "target": "ae04248a-e13c-4b40-81db-a1bbb3800e07",
+      "source_node_uuid": "a77b2bcc-018b-44ce-a77d-8fcbec344cbc",
+      "target_node_uuid": "ae04248a-e13c-4b40-81db-a1bbb3800e07",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "ae04248a-e13c-4b40-81db-a1bbb3800e07",
+      "target": "02e84013-f4fe-4af8-b21d-d6ecb5f51cec",
+      "source_node_uuid": "ae04248a-e13c-4b40-81db-a1bbb3800e07",
+      "target_node_uuid": "02e84013-f4fe-4af8-b21d-d6ecb5f51cec",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "02e84013-f4fe-4af8-b21d-d6ecb5f51cec",
+      "target": "8ad861ab-5943-45da-a633-a6a484671dc2",
+      "source_node_uuid": "02e84013-f4fe-4af8-b21d-d6ecb5f51cec",
+      "target_node_uuid": "8ad861ab-5943-45da-a633-a6a484671dc2",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "8ad861ab-5943-45da-a633-a6a484671dc2",
+      "target": "b0495823-0017-48fe-8fb4-0b3ee1488ba3",
+      "source_node_uuid": "8ad861ab-5943-45da-a633-a6a484671dc2",
+      "target_node_uuid": "b0495823-0017-48fe-8fb4-0b3ee1488ba3",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b0495823-0017-48fe-8fb4-0b3ee1488ba3",
+      "target": "61312558-ebe8-4f7e-9c24-c17c62068e78",
+      "source_node_uuid": "b0495823-0017-48fe-8fb4-0b3ee1488ba3",
+      "target_node_uuid": "61312558-ebe8-4f7e-9c24-c17c62068e78",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "61312558-ebe8-4f7e-9c24-c17c62068e78",
+      "target": "b88bbbea-8cc6-4395-a0be-59a88ddb2bc3",
+      "source_node_uuid": "61312558-ebe8-4f7e-9c24-c17c62068e78",
+      "target_node_uuid": "b88bbbea-8cc6-4395-a0be-59a88ddb2bc3",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b88bbbea-8cc6-4395-a0be-59a88ddb2bc3",
+      "target": "c3752290-3c7b-4ebe-bd29-3248ae371a66",
+      "source_node_uuid": "b88bbbea-8cc6-4395-a0be-59a88ddb2bc3",
+      "target_node_uuid": "c3752290-3c7b-4ebe-bd29-3248ae371a66",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "c3752290-3c7b-4ebe-bd29-3248ae371a66",
+      "target": "7de1cd32-5162-4668-bc85-415da3195a7f",
+      "source_node_uuid": "c3752290-3c7b-4ebe-bd29-3248ae371a66",
+      "target_node_uuid": "7de1cd32-5162-4668-bc85-415da3195a7f",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "7de1cd32-5162-4668-bc85-415da3195a7f",
+      "target": "d24a52ae-5fe1-4ac7-bf4f-14948d67e29a",
+      "source_node_uuid": "7de1cd32-5162-4668-bc85-415da3195a7f",
+      "target_node_uuid": "d24a52ae-5fe1-4ac7-bf4f-14948d67e29a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d24a52ae-5fe1-4ac7-bf4f-14948d67e29a",
+      "target": "36ee9ccf-eed0-4d99-9467-0a770544edfe",
+      "source_node_uuid": "d24a52ae-5fe1-4ac7-bf4f-14948d67e29a",
+      "target_node_uuid": "36ee9ccf-eed0-4d99-9467-0a770544edfe",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "36ee9ccf-eed0-4d99-9467-0a770544edfe",
+      "target": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "source_node_uuid": "36ee9ccf-eed0-4d99-9467-0a770544edfe",
+      "target_node_uuid": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "target": "630db65b-fd72-43b6-8bfe-28b1586f594e",
+      "source_node_uuid": "c8c5c660-dad5-4739-b815-0759b1990c01",
+      "target_node_uuid": "630db65b-fd72-43b6-8bfe-28b1586f594e",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "630db65b-fd72-43b6-8bfe-28b1586f594e",
+      "target": "f6aa1ce1-5760-45de-aae3-f7222a6598a2",
+      "source_node_uuid": "630db65b-fd72-43b6-8bfe-28b1586f594e",
+      "target_node_uuid": "f6aa1ce1-5760-45de-aae3-f7222a6598a2",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "f6aa1ce1-5760-45de-aae3-f7222a6598a2",
+      "target": "b2d635a8-dae1-4003-ac62-f395922e65d2",
+      "source_node_uuid": "f6aa1ce1-5760-45de-aae3-f7222a6598a2",
+      "target_node_uuid": "b2d635a8-dae1-4003-ac62-f395922e65d2",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b2d635a8-dae1-4003-ac62-f395922e65d2",
+      "target": "3a0e76dc-e293-4c0c-8e3f-f1cd708833d3",
+      "source_node_uuid": "b2d635a8-dae1-4003-ac62-f395922e65d2",
+      "target_node_uuid": "3a0e76dc-e293-4c0c-8e3f-f1cd708833d3",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3a0e76dc-e293-4c0c-8e3f-f1cd708833d3",
+      "target": "57b2a573-3d94-4d33-bcae-360e6c5fc250",
+      "source_node_uuid": "3a0e76dc-e293-4c0c-8e3f-f1cd708833d3",
+      "target_node_uuid": "57b2a573-3d94-4d33-bcae-360e6c5fc250",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "57b2a573-3d94-4d33-bcae-360e6c5fc250",
+      "target": "8f90c29a-7786-4456-a74e-db3a1180cde4",
+      "source_node_uuid": "57b2a573-3d94-4d33-bcae-360e6c5fc250",
+      "target_node_uuid": "8f90c29a-7786-4456-a74e-db3a1180cde4",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "8f90c29a-7786-4456-a74e-db3a1180cde4",
+      "target": "69623ccc-b0d9-407c-86a2-3438cd2ac721",
+      "source_node_uuid": "8f90c29a-7786-4456-a74e-db3a1180cde4",
+      "target_node_uuid": "69623ccc-b0d9-407c-86a2-3438cd2ac721",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "69623ccc-b0d9-407c-86a2-3438cd2ac721",
+      "target": "2dfed3c2-d71c-4b70-85af-cd8782515b89",
+      "source_node_uuid": "69623ccc-b0d9-407c-86a2-3438cd2ac721",
+      "target_node_uuid": "2dfed3c2-d71c-4b70-85af-cd8782515b89",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2dfed3c2-d71c-4b70-85af-cd8782515b89",
+      "target": "77c4fec7-bec7-46cf-b68a-c12622a8556d",
+      "source_node_uuid": "2dfed3c2-d71c-4b70-85af-cd8782515b89",
+      "target_node_uuid": "77c4fec7-bec7-46cf-b68a-c12622a8556d",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "77c4fec7-bec7-46cf-b68a-c12622a8556d",
+      "target": "3040d3de-c00d-4d7f-be1a-1c6012625329",
+      "source_node_uuid": "77c4fec7-bec7-46cf-b68a-c12622a8556d",
+      "target_node_uuid": "3040d3de-c00d-4d7f-be1a-1c6012625329",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3040d3de-c00d-4d7f-be1a-1c6012625329",
+      "target": "d1110750-e585-41a4-adfc-31cf73b2ad1b",
+      "source_node_uuid": "3040d3de-c00d-4d7f-be1a-1c6012625329",
+      "target_node_uuid": "d1110750-e585-41a4-adfc-31cf73b2ad1b",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d1110750-e585-41a4-adfc-31cf73b2ad1b",
+      "target": "ce0115ed-d139-42cc-9d54-75700a4fe4ad",
+      "source_node_uuid": "d1110750-e585-41a4-adfc-31cf73b2ad1b",
+      "target_node_uuid": "ce0115ed-d139-42cc-9d54-75700a4fe4ad",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "ce0115ed-d139-42cc-9d54-75700a4fe4ad",
+      "target": "2c87161d-6466-41da-a846-6d77651993d5",
+      "source_node_uuid": "ce0115ed-d139-42cc-9d54-75700a4fe4ad",
+      "target_node_uuid": "2c87161d-6466-41da-a846-6d77651993d5",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2c87161d-6466-41da-a846-6d77651993d5",
+      "target": "df58b2d1-668b-4fd8-a351-1ab5f2326bd8",
+      "source_node_uuid": "2c87161d-6466-41da-a846-6d77651993d5",
+      "target_node_uuid": "df58b2d1-668b-4fd8-a351-1ab5f2326bd8",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "df58b2d1-668b-4fd8-a351-1ab5f2326bd8",
+      "target": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "source_node_uuid": "df58b2d1-668b-4fd8-a351-1ab5f2326bd8",
+      "target_node_uuid": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "target": "b4f66bd1-8fb7-4e64-bb18-768e6d4b4799",
+      "source_node_uuid": "f332c062-fc3c-4f45-b0f8-0e6c17a625a9",
+      "target_node_uuid": "b4f66bd1-8fb7-4e64-bb18-768e6d4b4799",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b4f66bd1-8fb7-4e64-bb18-768e6d4b4799",
+      "target": "ebacc095-85f7-4dad-b462-209d24082749",
+      "source_node_uuid": "b4f66bd1-8fb7-4e64-bb18-768e6d4b4799",
+      "target_node_uuid": "ebacc095-85f7-4dad-b462-209d24082749",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "ebacc095-85f7-4dad-b462-209d24082749",
+      "target": "91e56b07-3063-43d4-abf1-31eeeb4ee993",
+      "source_node_uuid": "ebacc095-85f7-4dad-b462-209d24082749",
+      "target_node_uuid": "91e56b07-3063-43d4-abf1-31eeeb4ee993",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "91e56b07-3063-43d4-abf1-31eeeb4ee993",
+      "target": "3805838e-8cd4-4984-b805-f05f6146f5b2",
+      "source_node_uuid": "91e56b07-3063-43d4-abf1-31eeeb4ee993",
+      "target_node_uuid": "3805838e-8cd4-4984-b805-f05f6146f5b2",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3805838e-8cd4-4984-b805-f05f6146f5b2",
+      "target": "b99ba92f-c464-4213-8653-a6b4f579dc26",
+      "source_node_uuid": "3805838e-8cd4-4984-b805-f05f6146f5b2",
+      "target_node_uuid": "b99ba92f-c464-4213-8653-a6b4f579dc26",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b99ba92f-c464-4213-8653-a6b4f579dc26",
+      "target": "813619eb-428a-4f9d-9fa1-6aa5b79716cc",
+      "source_node_uuid": "b99ba92f-c464-4213-8653-a6b4f579dc26",
+      "target_node_uuid": "813619eb-428a-4f9d-9fa1-6aa5b79716cc",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "813619eb-428a-4f9d-9fa1-6aa5b79716cc",
+      "target": "6e1149dc-0d33-41da-b1ec-defc14cdd834",
+      "source_node_uuid": "813619eb-428a-4f9d-9fa1-6aa5b79716cc",
+      "target_node_uuid": "6e1149dc-0d33-41da-b1ec-defc14cdd834",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "6e1149dc-0d33-41da-b1ec-defc14cdd834",
+      "target": "78064ada-962e-4e33-a9e8-4a7471b5fdf9",
+      "source_node_uuid": "6e1149dc-0d33-41da-b1ec-defc14cdd834",
+      "target_node_uuid": "78064ada-962e-4e33-a9e8-4a7471b5fdf9",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "78064ada-962e-4e33-a9e8-4a7471b5fdf9",
+      "target": "e5fd60d1-bb42-4d9c-bdf3-7fd503b503f4",
+      "source_node_uuid": "78064ada-962e-4e33-a9e8-4a7471b5fdf9",
+      "target_node_uuid": "e5fd60d1-bb42-4d9c-bdf3-7fd503b503f4",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "e5fd60d1-bb42-4d9c-bdf3-7fd503b503f4",
+      "target": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "source_node_uuid": "e5fd60d1-bb42-4d9c-bdf3-7fd503b503f4",
+      "target_node_uuid": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "target": "457e5365-80f0-429f-a88a-0c9f785049f9",
+      "source_node_uuid": "efd5fcc1-89ff-47cd-9516-cdea943be183",
+      "target_node_uuid": "457e5365-80f0-429f-a88a-0c9f785049f9",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "457e5365-80f0-429f-a88a-0c9f785049f9",
+      "target": "3ac40770-574a-4a88-b1cd-b89a72c808de",
+      "source_node_uuid": "457e5365-80f0-429f-a88a-0c9f785049f9",
+      "target_node_uuid": "3ac40770-574a-4a88-b1cd-b89a72c808de",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3ac40770-574a-4a88-b1cd-b89a72c808de",
+      "target": "74c0099c-823a-44da-9884-c0b3047b8bf1",
+      "source_node_uuid": "3ac40770-574a-4a88-b1cd-b89a72c808de",
+      "target_node_uuid": "74c0099c-823a-44da-9884-c0b3047b8bf1",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "74c0099c-823a-44da-9884-c0b3047b8bf1",
+      "target": "fd27e76b-b0ed-4063-b0bf-9f73ccb022c2",
+      "source_node_uuid": "74c0099c-823a-44da-9884-c0b3047b8bf1",
+      "target_node_uuid": "fd27e76b-b0ed-4063-b0bf-9f73ccb022c2",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "fd27e76b-b0ed-4063-b0bf-9f73ccb022c2",
+      "target": "2767439b-604e-48df-97c2-ada207063789",
+      "source_node_uuid": "fd27e76b-b0ed-4063-b0bf-9f73ccb022c2",
+      "target_node_uuid": "2767439b-604e-48df-97c2-ada207063789",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2767439b-604e-48df-97c2-ada207063789",
+      "target": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "source_node_uuid": "2767439b-604e-48df-97c2-ada207063789",
+      "target_node_uuid": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "target": "c49e5fb0-8325-497d-abb9-c0d56a0709b9",
+      "source_node_uuid": "644dfb79-12b6-439d-b023-8450b23dab5f",
+      "target_node_uuid": "c49e5fb0-8325-497d-abb9-c0d56a0709b9",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "c49e5fb0-8325-497d-abb9-c0d56a0709b9",
+      "target": "eef22089-0a9d-43fc-80f7-f2c128ac6249",
+      "source_node_uuid": "c49e5fb0-8325-497d-abb9-c0d56a0709b9",
+      "target_node_uuid": "eef22089-0a9d-43fc-80f7-f2c128ac6249",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "eef22089-0a9d-43fc-80f7-f2c128ac6249",
+      "target": "6d1ca769-bd44-4f3f-8c55-8ada2ac6f607",
+      "source_node_uuid": "eef22089-0a9d-43fc-80f7-f2c128ac6249",
+      "target_node_uuid": "6d1ca769-bd44-4f3f-8c55-8ada2ac6f607",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "6d1ca769-bd44-4f3f-8c55-8ada2ac6f607",
+      "target": "69829dae-bfbe-457e-bb17-144b764c4e1a",
+      "source_node_uuid": "6d1ca769-bd44-4f3f-8c55-8ada2ac6f607",
+      "target_node_uuid": "69829dae-bfbe-457e-bb17-144b764c4e1a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "69829dae-bfbe-457e-bb17-144b764c4e1a",
+      "target": "04c9cc2e-b72a-4dda-b333-70c6ed189715",
+      "source_node_uuid": "69829dae-bfbe-457e-bb17-144b764c4e1a",
+      "target_node_uuid": "04c9cc2e-b72a-4dda-b333-70c6ed189715",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "04c9cc2e-b72a-4dda-b333-70c6ed189715",
+      "target": "d7559620-921f-4c42-a396-a6cb8e2bbdee",
+      "source_node_uuid": "04c9cc2e-b72a-4dda-b333-70c6ed189715",
+      "target_node_uuid": "d7559620-921f-4c42-a396-a6cb8e2bbdee",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d7559620-921f-4c42-a396-a6cb8e2bbdee",
+      "target": "f15acc81-64bb-4966-93ab-94a17b06e246",
+      "source_node_uuid": "d7559620-921f-4c42-a396-a6cb8e2bbdee",
+      "target_node_uuid": "f15acc81-64bb-4966-93ab-94a17b06e246",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "f15acc81-64bb-4966-93ab-94a17b06e246",
+      "target": "8db7b120-2684-47af-8b92-a915fdcbfb2b",
+      "source_node_uuid": "f15acc81-64bb-4966-93ab-94a17b06e246",
+      "target_node_uuid": "8db7b120-2684-47af-8b92-a915fdcbfb2b",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "8db7b120-2684-47af-8b92-a915fdcbfb2b",
+      "target": "caaea882-0d2d-42e6-8693-82ae5a98f835",
+      "source_node_uuid": "8db7b120-2684-47af-8b92-a915fdcbfb2b",
+      "target_node_uuid": "caaea882-0d2d-42e6-8693-82ae5a98f835",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "caaea882-0d2d-42e6-8693-82ae5a98f835",
+      "target": "5e361761-c327-4033-b245-c7c252686628",
+      "source_node_uuid": "caaea882-0d2d-42e6-8693-82ae5a98f835",
+      "target_node_uuid": "5e361761-c327-4033-b245-c7c252686628",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "5e361761-c327-4033-b245-c7c252686628",
+      "target": "3ec40cc7-42d4-4cea-9555-0e9547ec20fc",
+      "source_node_uuid": "5e361761-c327-4033-b245-c7c252686628",
+      "target_node_uuid": "3ec40cc7-42d4-4cea-9555-0e9547ec20fc",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "3ec40cc7-42d4-4cea-9555-0e9547ec20fc",
+      "target": "965a8356-4c71-44f2-affc-dffe25ceff7c",
+      "source_node_uuid": "3ec40cc7-42d4-4cea-9555-0e9547ec20fc",
+      "target_node_uuid": "965a8356-4c71-44f2-affc-dffe25ceff7c",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "965a8356-4c71-44f2-affc-dffe25ceff7c",
+      "target": "5f78ada4-4acf-4444-aa9e-a76c8e8dbd00",
+      "source_node_uuid": "965a8356-4c71-44f2-affc-dffe25ceff7c",
+      "target_node_uuid": "5f78ada4-4acf-4444-aa9e-a76c8e8dbd00",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "5f78ada4-4acf-4444-aa9e-a76c8e8dbd00",
+      "target": "2866b5af-7f23-43ac-a18b-070a9503a2cf",
+      "source_node_uuid": "5f78ada4-4acf-4444-aa9e-a76c8e8dbd00",
+      "target_node_uuid": "2866b5af-7f23-43ac-a18b-070a9503a2cf",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2866b5af-7f23-43ac-a18b-070a9503a2cf",
+      "target": "7b01eff8-258b-46f6-8e23-2e5a568a2947",
+      "source_node_uuid": "2866b5af-7f23-43ac-a18b-070a9503a2cf",
+      "target_node_uuid": "7b01eff8-258b-46f6-8e23-2e5a568a2947",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "7b01eff8-258b-46f6-8e23-2e5a568a2947",
+      "target": "57621609-c39b-407f-9075-2d58bf841378",
+      "source_node_uuid": "7b01eff8-258b-46f6-8e23-2e5a568a2947",
+      "target_node_uuid": "57621609-c39b-407f-9075-2d58bf841378",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "57621609-c39b-407f-9075-2d58bf841378",
+      "target": "d9507054-df5d-4019-b483-bd3d7634fa59",
+      "source_node_uuid": "57621609-c39b-407f-9075-2d58bf841378",
+      "target_node_uuid": "d9507054-df5d-4019-b483-bd3d7634fa59",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d9507054-df5d-4019-b483-bd3d7634fa59",
+      "target": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "source_node_uuid": "d9507054-df5d-4019-b483-bd3d7634fa59",
+      "target_node_uuid": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "target": "12a98915-a041-4cde-88d9-72a14fdeefab",
+      "source_node_uuid": "4b6e2cb1-42e7-435d-a7fc-3758ce2f2dad",
+      "target_node_uuid": "12a98915-a041-4cde-88d9-72a14fdeefab",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "12a98915-a041-4cde-88d9-72a14fdeefab",
+      "target": "131d39a1-bbc5-46c9-8367-d4f69858a643",
+      "source_node_uuid": "12a98915-a041-4cde-88d9-72a14fdeefab",
+      "target_node_uuid": "131d39a1-bbc5-46c9-8367-d4f69858a643",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "131d39a1-bbc5-46c9-8367-d4f69858a643",
+      "target": "1bcc1440-47a9-4909-8833-8e5c9be83518",
+      "source_node_uuid": "131d39a1-bbc5-46c9-8367-d4f69858a643",
+      "target_node_uuid": "1bcc1440-47a9-4909-8833-8e5c9be83518",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "1bcc1440-47a9-4909-8833-8e5c9be83518",
+      "target": "d64649a9-1bf9-4610-8cb3-20f77b970e0e",
+      "source_node_uuid": "1bcc1440-47a9-4909-8833-8e5c9be83518",
+      "target_node_uuid": "d64649a9-1bf9-4610-8cb3-20f77b970e0e",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d64649a9-1bf9-4610-8cb3-20f77b970e0e",
+      "target": "2ac50468-a02a-417d-9536-2b42279c1f1b",
+      "source_node_uuid": "d64649a9-1bf9-4610-8cb3-20f77b970e0e",
+      "target_node_uuid": "2ac50468-a02a-417d-9536-2b42279c1f1b",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2ac50468-a02a-417d-9536-2b42279c1f1b",
+      "target": "cdbd5472-9937-4130-aea3-10415badf929",
+      "source_node_uuid": "2ac50468-a02a-417d-9536-2b42279c1f1b",
+      "target_node_uuid": "cdbd5472-9937-4130-aea3-10415badf929",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "cdbd5472-9937-4130-aea3-10415badf929",
+      "target": "105eab50-427d-45d9-a769-df5a53f3cc96",
+      "source_node_uuid": "cdbd5472-9937-4130-aea3-10415badf929",
+      "target_node_uuid": "105eab50-427d-45d9-a769-df5a53f3cc96",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "105eab50-427d-45d9-a769-df5a53f3cc96",
+      "target": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "source_node_uuid": "105eab50-427d-45d9-a769-df5a53f3cc96",
+      "target_node_uuid": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target": "4c2913aa-c58f-4134-849a-47f54a4f7fba",
+      "source_node_uuid": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target_node_uuid": "4c2913aa-c58f-4134-849a-47f54a4f7fba",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "4c2913aa-c58f-4134-849a-47f54a4f7fba",
+      "target": "a8951279-6aee-40f0-97c1-a831a3e404f9",
+      "source_node_uuid": "4c2913aa-c58f-4134-849a-47f54a4f7fba",
+      "target_node_uuid": "a8951279-6aee-40f0-97c1-a831a3e404f9",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "a8951279-6aee-40f0-97c1-a831a3e404f9",
+      "target": "a2ae4ab7-0825-48e5-9c70-c617e3669507",
+      "source_node_uuid": "a8951279-6aee-40f0-97c1-a831a3e404f9",
+      "target_node_uuid": "a2ae4ab7-0825-48e5-9c70-c617e3669507",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target": "2d6c0729-8ddc-4a44-8b7b-eeb833dcf116",
+      "source_node_uuid": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target_node_uuid": "2d6c0729-8ddc-4a44-8b7b-eeb833dcf116",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2d6c0729-8ddc-4a44-8b7b-eeb833dcf116",
+      "target": "d9fd57f9-9155-4f22-8926-00a0f9a0d015",
+      "source_node_uuid": "2d6c0729-8ddc-4a44-8b7b-eeb833dcf116",
+      "target_node_uuid": "d9fd57f9-9155-4f22-8926-00a0f9a0d015",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d9fd57f9-9155-4f22-8926-00a0f9a0d015",
+      "target": "5a05d4ac-e477-4d7f-b4f3-a2b0a08686e5",
+      "source_node_uuid": "d9fd57f9-9155-4f22-8926-00a0f9a0d015",
+      "target_node_uuid": "5a05d4ac-e477-4d7f-b4f3-a2b0a08686e5",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target": "7d4905f1-7ff7-4072-9b17-95b09b516b9d",
+      "source_node_uuid": "0c9b28cb-33ac-4d81-a3e3-e1afa4f2b213",
+      "target_node_uuid": "7d4905f1-7ff7-4072-9b17-95b09b516b9d",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "7d4905f1-7ff7-4072-9b17-95b09b516b9d",
+      "target": "d70aceb0-76d6-4209-9ebe-e3c6bc2df6f4",
+      "source_node_uuid": "7d4905f1-7ff7-4072-9b17-95b09b516b9d",
+      "target_node_uuid": "d70aceb0-76d6-4209-9ebe-e3c6bc2df6f4",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d70aceb0-76d6-4209-9ebe-e3c6bc2df6f4",
+      "target": "bf43d15a-e6f4-44dd-955f-7aa13bfa412a",
+      "source_node_uuid": "d70aceb0-76d6-4209-9ebe-e3c6bc2df6f4",
+      "target_node_uuid": "bf43d15a-e6f4-44dd-955f-7aa13bfa412a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "bf43d15a-e6f4-44dd-955f-7aa13bfa412a",
+      "target": "d54fce1c-654a-4ad9-9adb-45871b84d6ce",
+      "source_node_uuid": "bf43d15a-e6f4-44dd-955f-7aa13bfa412a",
+      "target_node_uuid": "d54fce1c-654a-4ad9-9adb-45871b84d6ce",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "d54fce1c-654a-4ad9-9adb-45871b84d6ce",
+      "target": "e1bf9099-7111-4739-ab63-fdf678ff0dd7",
+      "source_node_uuid": "d54fce1c-654a-4ad9-9adb-45871b84d6ce",
+      "target_node_uuid": "e1bf9099-7111-4739-ab63-fdf678ff0dd7",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "e1bf9099-7111-4739-ab63-fdf678ff0dd7",
+      "target": "e32959cf-333f-4272-ad2b-e093e1daabb0",
+      "source_node_uuid": "e1bf9099-7111-4739-ab63-fdf678ff0dd7",
+      "target_node_uuid": "e32959cf-333f-4272-ad2b-e093e1daabb0",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "a2ae4ab7-0825-48e5-9c70-c617e3669507",
+      "target": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_node_uuid": "a2ae4ab7-0825-48e5-9c70-c617e3669507",
+      "target_node_uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "5a05d4ac-e477-4d7f-b4f3-a2b0a08686e5",
+      "target": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_node_uuid": "5a05d4ac-e477-4d7f-b4f3-a2b0a08686e5",
+      "target_node_uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "e32959cf-333f-4272-ad2b-e093e1daabb0",
+      "target": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_node_uuid": "e32959cf-333f-4272-ad2b-e093e1daabb0",
+      "target_node_uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "target": "cf117520-7aa1-4f2a-b198-ac1bec69ee06",
+      "source_node_uuid": "ffbda4a7-85a8-41c8-baed-08ca226b6dff",
+      "target_node_uuid": "cf117520-7aa1-4f2a-b198-ac1bec69ee06",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "cf117520-7aa1-4f2a-b198-ac1bec69ee06",
+      "target": "dc4c5a0e-7b64-4405-b60f-e704d00fedeb",
+      "source_node_uuid": "cf117520-7aa1-4f2a-b198-ac1bec69ee06",
+      "target_node_uuid": "dc4c5a0e-7b64-4405-b60f-e704d00fedeb",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "dc4c5a0e-7b64-4405-b60f-e704d00fedeb",
+      "target": "9407474f-b502-4f00-ae43-af6c5a3faa49",
+      "source_node_uuid": "dc4c5a0e-7b64-4405-b60f-e704d00fedeb",
+      "target_node_uuid": "9407474f-b502-4f00-ae43-af6c5a3faa49",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "9407474f-b502-4f00-ae43-af6c5a3faa49",
+      "target": "9bf06d0d-a23d-48a9-a369-b0e7e3c3e77a",
+      "source_node_uuid": "9407474f-b502-4f00-ae43-af6c5a3faa49",
+      "target_node_uuid": "9bf06d0d-a23d-48a9-a369-b0e7e3c3e77a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "9bf06d0d-a23d-48a9-a369-b0e7e3c3e77a",
+      "target": "0615f61e-44c0-4319-988b-c8a15a39e51d",
+      "source_node_uuid": "9bf06d0d-a23d-48a9-a369-b0e7e3c3e77a",
+      "target_node_uuid": "0615f61e-44c0-4319-988b-c8a15a39e51d",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "0615f61e-44c0-4319-988b-c8a15a39e51d",
+      "target": "7ed72933-5208-43df-926a-da04ed62b84c",
+      "source_node_uuid": "0615f61e-44c0-4319-988b-c8a15a39e51d",
+      "target_node_uuid": "7ed72933-5208-43df-926a-da04ed62b84c",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "7ed72933-5208-43df-926a-da04ed62b84c",
+      "target": "efc77e49-e7f4-406d-b1a6-d515d3d84abf",
+      "source_node_uuid": "7ed72933-5208-43df-926a-da04ed62b84c",
+      "target_node_uuid": "efc77e49-e7f4-406d-b1a6-d515d3d84abf",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "efc77e49-e7f4-406d-b1a6-d515d3d84abf",
+      "target": "41601da8-3cea-4aec-be23-593e04c8ce23",
+      "source_node_uuid": "efc77e49-e7f4-406d-b1a6-d515d3d84abf",
+      "target_node_uuid": "41601da8-3cea-4aec-be23-593e04c8ce23",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "41601da8-3cea-4aec-be23-593e04c8ce23",
+      "target": "be1f50f4-9dc4-4f2c-97e7-e319d4c713ec",
+      "source_node_uuid": "41601da8-3cea-4aec-be23-593e04c8ce23",
+      "target_node_uuid": "be1f50f4-9dc4-4f2c-97e7-e319d4c713ec",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "be1f50f4-9dc4-4f2c-97e7-e319d4c713ec",
+      "target": "c88318d9-f0c3-4c1f-b3f8-1e6b6bbbc60a",
+      "source_node_uuid": "be1f50f4-9dc4-4f2c-97e7-e319d4c713ec",
+      "target_node_uuid": "c88318d9-f0c3-4c1f-b3f8-1e6b6bbbc60a",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "c88318d9-f0c3-4c1f-b3f8-1e6b6bbbc60a",
+      "target": "2e855e12-e832-4790-ac7a-811337a88eb7",
+      "source_node_uuid": "c88318d9-f0c3-4c1f-b3f8-1e6b6bbbc60a",
+      "target_node_uuid": "2e855e12-e832-4790-ac7a-811337a88eb7",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "2e855e12-e832-4790-ac7a-811337a88eb7",
+      "target": "b9716a8b-47e6-46b7-a872-b3b0721ce8a7",
+      "source_node_uuid": "2e855e12-e832-4790-ac7a-811337a88eb7",
+      "target_node_uuid": "b9716a8b-47e6-46b7-a872-b3b0721ce8a7",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "b9716a8b-47e6-46b7-a872-b3b0721ce8a7",
+      "target": "04a38a36-2479-451c-a7ee-b5e0288a7bee",
+      "source_node_uuid": "b9716a8b-47e6-46b7-a872-b3b0721ce8a7",
+      "target_node_uuid": "04a38a36-2479-451c-a7ee-b5e0288a7bee",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    },
+    {
+      "source": "04a38a36-2479-451c-a7ee-b5e0288a7bee",
+      "target": "2ef89f6a-97fb-4b51-bd5f-dace9b8da268",
+      "source_node_uuid": "04a38a36-2479-451c-a7ee-b5e0288a7bee",
+      "target_node_uuid": "2ef89f6a-97fb-4b51-bd5f-dace9b8da268",
+      "source_handle_key": "ready",
+      "source_handle_io": "source",
+      "target_handle_key": "ready",
+      "target_handle_io": "target"
+    }
+  ]
+}

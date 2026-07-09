@@ -1,0 +1,251 @@
+move_group:
+  ros__parameters:
+    allow_trajectory_execution: false
+    capabilities: ''
+    disable_capabilities: ''
+    jiggle_fraction: 0.05
+    monitor_dynamics: false
+    ompl:
+      jiggle_fraction: 0.05
+      planner_configs:
+        AnytimePathShortening:
+          hybridize: 1
+          max_hybrid_paths: 24
+          num_planners: 4
+          planners: ''
+          shortcut: 1
+          type: geometric::AnytimePathShortening
+        BFMT:
+          balanced: 0
+          cache_cc: 1
+          extended_fmt: 1
+          heuristics: 1
+          nearest_k: 1
+          num_samples: 1000
+          optimality: 1
+          radius_multiplier: 1.0
+          type: geometric::BFMT
+        BKPIECE:
+          border_fraction: 0.9
+          failed_expansion_score_factor: 0.5
+          min_valid_path_fraction: 0.5
+          range: 0.0
+          type: geometric::BKPIECE
+        BiEST:
+          range: 0.0
+          type: geometric::BiEST
+        BiTRRT:
+          cost_threshold: 1e300
+          frountier_node_ratio: 0.1
+          frountier_threshold: 0.0
+          init_temperature: 100
+          range: 0.0
+          temp_change_factor: 0.1
+          type: geometric::BiTRRT
+        EST:
+          goal_bias: 0.05
+          range: 0.0
+          type: geometric::EST
+        FMT:
+          cache_cc: 1
+          extended_fmt: 1
+          heuristics: 0
+          nearest_k: 1
+          num_samples: 1000
+          radius_multiplier: 1.1
+          type: geometric::FMT
+        KPIECE:
+          border_fraction: 0.9
+          failed_expansion_score_factor: 0.5
+          goal_bias: 0.05
+          min_valid_path_fraction: 0.5
+          range: 0.0
+          type: geometric::KPIECE
+        LBKPIECE:
+          border_fraction: 0.9
+          min_valid_path_fraction: 0.5
+          range: 0.0
+          type: geometric::LBKPIECE
+        LBTRRT:
+          epsilon: 0.4
+          goal_bias: 0.05
+          range: 0.0
+          type: geometric::LBTRRT
+        LazyPRM:
+          range: 0.0
+          type: geometric::LazyPRM
+        LazyPRMstar:
+          type: geometric::LazyPRMstar
+        PDST:
+          type: geometric::PDST
+        PRM:
+          max_nearest_neighbors: 10
+          type: geometric::PRM
+        PRMstar:
+          type: geometric::PRMstar
+        ProjEST:
+          goal_bias: 0.05
+          range: 0.0
+          type: geometric::ProjEST
+        RRT:
+          goal_bias: 0.05
+          range: 0.0
+          type: geometric::RRT
+        RRTConnect:
+          range: 0.0
+          type: geometric::RRTConnect
+        RRTstar:
+          delay_collision_checking: 1
+          goal_bias: 0.05
+          range: 0.0
+          type: geometric::RRTstar
+        SBL:
+          range: 0.0
+          type: geometric::SBL
+        SPARS:
+          dense_delta_fraction: 0.001
+          max_failures: 1000
+          sparse_delta_fraction: 0.25
+          stretch_factor: 3.0
+          type: geometric::SPARS
+        SPARStwo:
+          dense_delta_fraction: 0.001
+          max_failures: 5000
+          sparse_delta_fraction: 0.25
+          stretch_factor: 3.0
+          type: geometric::SPARStwo
+        STRIDE:
+          degree: 16
+          estimated_dimension: 0.0
+          goal_bias: 0.05
+          max_degree: 18
+          max_pts_per_leaf: 6
+          min_degree: 12
+          min_valid_path_fraction: 0.2
+          range: 0.0
+          type: geometric::STRIDE
+          use_projected_distance: 0
+        TRRT:
+          frountierNodeRatio: 0.1
+          frountier_threshold: 0.0
+          goal_bias: 0.05
+          init_temperature: 10e-6
+          k_constant: 0.0
+          max_states_failed: 10
+          min_temperature: 10e-10
+          range: 0.0
+          temp_change_factor: 2.0
+          type: geometric::TRRT
+      planning_plugin: ompl_interface/OMPLPlanner
+      request_adapters: default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/ResolveConstraintFrames default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds
+        default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints
+      start_state_max_bounds_error: 0.1
+    planning_plugin: ompl_interface/OMPLPlanner
+    publish_geometry_updates: true
+    publish_monitored_planning_scene: true
+    publish_planning_scene: true
+    publish_robot_description_semantic: true
+    publish_state_updates: true
+    publish_transforms_updates: true
+    request_adapters: default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/ResolveConstraintFrames default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds
+      default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints
+    robot_description: <?xml version="1.0" ?><robot name="full_dev"><link name="world"/><material name="silver"><color rgba="0.700 0.700 0.700 1.000"/></material><transmission name="Joint1_tran"><type>transmission_interface/SimpleTransmission</type><joint
+      name="Joint1"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint1_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><transmission
+      name="Joint2_tran"><type>transmission_interface/SimpleTransmission</type><joint name="Joint2"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint2_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><transmission
+      name="Joint3_tran"><type>transmission_interface/SimpleTransmission</type><joint name="Joint3"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint3_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><transmission
+      name="Joint4_tran"><type>transmission_interface/SimpleTransmission</type><joint name="Joint4"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint4_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><transmission
+      name="Joint5_tran"><type>transmission_interface/SimpleTransmission</type><joint name="Joint5"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint5_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><transmission
+      name="Joint6_tran"><type>transmission_interface/SimpleTransmission</type><joint name="Joint6"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint><actuator name="Joint6_actr"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission><joint
+      name="dummy2_arm_base_link_joint" type="fixed"><origin rpy="0 0 0" xyz="0 0 0"/><parent link="world"/><child link="dummy2_arm_device_link"/><axis xyz="0 0 0"/></joint><link name="dummy2_arm_device_link"/><joint
+      name="dummy2_arm_device_link_joint" type="fixed"><origin rpy="0 0 0" xyz="0 0 0"/><parent link="dummy2_arm_device_link"/><child link="dummy2_arm_base_link"/><axis xyz="0 0 0"/></joint><link name="dummy2_arm_base_link"><inertial><origin
+      rpy="0 0 0" xyz="0.00010022425916431473 -6.186605493937309e-05 0.05493640543484716"/><mass value="1.2152141810431654"/><inertia ixx="0.002105" ixy="-0.0" ixz="0.0" iyy="0.002245" iyz="-1.1e-05" izz="0.002436"/></inertial><visual><origin
+      rpy="0 0 0" xyz="0 0 0"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/base_link.stl" scale="0.001 0.001 0.001"/></geometry><material
+      name="silver"/></visual><collision><origin rpy="0 0 0" xyz="0 0 0"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/base_link.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J1_1"><inertial><origin rpy="0 0 0" xyz="-0.00617659688932347 0.007029599744830012 0.012866826083045027"/><mass value="0.1332774369186824"/><inertia
+      ixx="6e-05" ixy="2.1e-05" ixz="8e-06" iyy="5e-05" iyz="-1.4e-05" izz="8.8e-05"/></inertial><visual><origin rpy="0 0 0" xyz="-0.0001 0.000289 -0.097579"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J1_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="-0.0001 0.000289 -0.097579"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J1_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J2_1"><inertial><origin rpy="0 0 0" xyz="0.019335709221765855 0.0019392793940843159 0.07795928103332703"/><mass value="1.9268013917303417"/><inertia
+      ixx="0.006165" ixy="-3e-06" ixz="0.0007" iyy="0.006538" iyz="4.7e-05" izz="0.00118"/></inertial><visual><origin rpy="0 0 0" xyz="0.011539 -0.034188 -0.12478"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J2_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="0.011539 -0.034188 -0.12478"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J2_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J3_1"><inertial><origin rpy="0 0 0" xyz="-0.010672101243726572 -0.02723871972304964 0.04876701375652198"/><mass value="0.30531962155452225"/><inertia
+      ixx="0.00029" ixy="-1.3e-05" ixz="3e-05" iyy="0.000238" iyz="4.1e-05" izz="0.000191"/></inertial><visual><origin rpy="0 0 0" xyz="-0.023811 -0.034188 -0.28278"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J3_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="-0.023811 -0.034188 -0.28278"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J3_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J4_1"><inertial><origin rpy="0 0 0" xyz="-0.005237398377441591 0.06002028183461833 0.0005891767740203724"/><mass value="0.14051172121899885"/><inertia
+      ixx="0.000245" ixy="1.6e-05" ixz="1e-06" iyy="7.9e-05" iyz="-2e-06" izz="0.00027"/></inertial><visual><origin rpy="0 0 0" xyz="-0.010649 -0.038288 -0.345246"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J4_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="-0.010649 -0.038288 -0.345246"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J4_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J5_1"><inertial><origin rpy="0 0 0" xyz="-0.014389813882964664 0.07305218143664277 -0.0009243405950149497"/><mass value="0.7783315754227634"/><inertia
+      ixx="0.000879" ixy="0.000146" ixz="-5e-06" iyy="0.000339" iyz="1e-06" izz="0.000964"/></inertial><visual><origin rpy="0 0 0" xyz="-0.031949 -0.148289 -0.345246"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J5_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="-0.031949 -0.148289 -0.345246"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J5_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_J6_1"><inertial><origin rpy="0 0 0" xyz="3.967160300787087e-07 0.0004995066702210837 1.4402781733924286e-07"/><mass
+      value="0.0020561527568204153"/><inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/></inertial><visual><origin rpy="0 0 0" xyz="-0.012127 -0.267789 -0.344021"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J6_1.stl"
+      scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin rpy="0 0 0" xyz="-0.012127 -0.267789 -0.344021"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/J6_1.stl"
+      scale="0.001 0.001 0.001"/></geometry></collision></link><link name="dummy2_arm_camera"><inertial><origin rpy="0 0 0" xyz="-0.0006059984983273845 0.0005864706438700462 0.04601775357664567"/><mass
+      value="0.21961029019655884"/><inertia ixx="2.9e-05" ixy="-0.0" ixz="-0.0" iyy="0.000206" iyz="2e-06" izz="0.000198"/></inertial><visual><origin rpy="0 0 0" xyz="-0.012661 -0.239774 -0.37985"/><geometry><mesh
+      filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/camera_1.stl" scale="0.001 0.001 0.001"/></geometry><material name="silver"/></visual><collision><origin
+      rpy="0 0 0" xyz="-0.012661 -0.239774 -0.37985"/><geometry><mesh filename="file:///home/ubuntu/workspace/Uni-Lab-OS/unilabos/device_mesh/devices/dummy2_robot/meshes/camera_1.stl" scale="0.001 0.001
+      0.001"/></geometry></collision></link><joint name="dummy2_arm_Joint1" type="revolute"><origin rpy="0 0 0" xyz="0.0001 -0.000289 0.097579"/><parent link="dummy2_arm_base_link"/><child link="dummy2_arm_J1_1"/><axis
+      xyz="-0.0 -0.0 1.0"/><limit effort="100" lower="-3.054326" upper="3.054326" velocity="100"/></joint><joint name="dummy2_arm_Joint2" type="revolute"><origin rpy="0 0 0" xyz="-0.011639 0.034477 0.027201"/><parent
+      link="dummy2_arm_J1_1"/><child link="dummy2_arm_J2_1"/><axis xyz="1.0 0.0 -0.0"/><limit effort="100" lower="-2.007129" upper="1.308997" velocity="100"/></joint><joint name="dummy2_arm_Joint3" type="revolute"><origin
+      rpy="0 0 0" xyz="0.03535 0.0 0.158"/><parent link="dummy2_arm_J2_1"/><child link="dummy2_arm_J3_1"/><axis xyz="-1.0 0.0 -0.0"/><limit effort="100" lower="-1.047198" upper="1.570796" velocity="100"/></joint><joint
+      name="dummy2_arm_Joint4" type="revolute"><origin rpy="0 0 0" xyz="-0.013162 0.0041 0.062466"/><parent link="dummy2_arm_J3_1"/><child link="dummy2_arm_J4_1"/><axis xyz="0.0 1.0 -0.0"/><limit effort="100"
+      lower="-3.141593" upper="3.141593" velocity="100"/></joint><joint name="dummy2_arm_Joint5" type="revolute"><origin rpy="0 0 0" xyz="0.0213 0.110001 0.0"/><parent link="dummy2_arm_J4_1"/><child link="dummy2_arm_J5_1"/><axis
+      xyz="-1.0 -0.0 -0.0"/><limit effort="100" lower="-1.919862" upper="2.094395" velocity="100"/></joint><joint name="dummy2_arm_Joint6" type="continuous"><origin rpy="0 0 0" xyz="-0.019822 0.1195 -0.001225"/><parent
+      link="dummy2_arm_J5_1"/><child link="dummy2_arm_J6_1"/><axis xyz="0.0 -1.0 0.0"/></joint><joint name="dummy2_arm_camera" type="fixed"><origin rpy="0 0 0" xyz="-0.019988 0.091197 0.024883"/><parent
+      link="dummy2_arm_J5_1"/><child link="dummy2_arm_camera"/><axis xyz="1.0 -0.0 0.0"/><limit effort="100" lower="0.0" upper="0.0" velocity="100"/></joint></robot>
+    robot_description_kinematics:
+      dummy2_arm:
+        kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+        kinematics_solver_search_resolution: 0.005
+        kinematics_solver_timeout: 0.5
+    robot_description_planning:
+      cartesian_limits:
+        max_rot_vel: 1.57
+        max_trans_acc: 2.25
+        max_trans_dec: -5.0
+        max_trans_vel: 1.0
+      default_acceleration_scaling_factor: 0.1
+      default_velocity_scaling_factor: 0.1
+      joint_limits:
+        dummy2_arm_joint_1:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+        dummy2_arm_joint_2:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+        dummy2_arm_joint_3:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+        dummy2_arm_joint_4:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+        dummy2_arm_joint_5:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+        dummy2_arm_joint_6:
+          has_acceleration_limits: false
+          has_velocity_limits: true
+          max_acceleration: 0
+          max_velocity: 2.0
+    robot_description_semantic: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<robot name=\"full_dev\">\n    <group name=\"dummy2_arm\">\n        <joint name=\"dummy2_arm_virtual_joint\"/>\n        <joint\
+      \ name=\"dummy2_arm_Joint1\"/>\n        <joint name=\"dummy2_arm_Joint2\"/>\n        <joint name=\"dummy2_arm_Joint3\"/>\n        <joint name=\"dummy2_arm_Joint4\"/>\n        <joint name=\"dummy2_arm_Joint5\"\
+      />\n        <joint name=\"dummy2_arm_Joint6\"/>\n    </group>\n\n    <group_state name=\"home\" group=\"dummy2_arm\">\n        <joint name=\"dummy2_arm_Joint1\" value=\"0\"/>\n        <joint name=\"\
+      dummy2_arm_Joint2\" value=\"0\"/>\n        <joint name=\"dummy2_arm_Joint3\" value=\"0\"/>\n        <joint name=\"dummy2_arm_Joint4\" value=\"0\"/>\n        <joint name=\"dummy2_arm_Joint5\" value=\"\
+      0\"/>\n        <joint name=\"dummy2_arm_Joint6\" value=\"0\"/>\n    </group_state>\n\n    <virtual_joint name=\"dummy2_arm_virtual_joint\" type=\"fixed\" parent_frame=\"world\" child_link=\"dummy2_arm_base_link\"\
+      />\n\n    <disable_collisions link1=\"dummy2_arm_J1_1\" link2=\"dummy2_arm_J2_1\" reason=\"Adjacent\"/>\n    <disable_collisions link1=\"dummy2_arm_J1_1\" link2=\"dummy2_arm_J3_1\" reason=\"Never\"\
+      />\n    <disable_collisions link1=\"dummy2_arm_J1_1\" link2=\"dummy2_arm_J4_1\" reason=\"Never\"/>\n    <disable_collisions link1=\"dummy2_arm_J1_1\" link2=\"dummy2_arm_base_link\" reason=\"Adjacent\"\
+      />\n    <disable_collisions link1=\"dummy2_arm_J2_1\" link2=\"dummy2_arm_J3_1\" reason=\"Adjacent\"/>\n    <disable_collisions link1=\"dummy2_arm_J3_1\" link2=\"dummy2_arm_J4_1\" reason=\"Adjacent\"\
+      />\n    <disable_collisions link1=\"dummy2_arm_J3_1\" link2=\"dummy2_arm_J5_1\" reason=\"Never\"/>\n    <disable_collisions link1=\"dummy2_arm_J3_1\" link2=\"dummy2_arm_J6_1\" reason=\"Never\"/>\n\
+      \    <disable_collisions link1=\"dummy2_arm_J3_1\" link2=\"dummy2_arm_base_link\" reason=\"Never\"/>\n    <disable_collisions link1=\"dummy2_arm_J4_1\" link2=\"dummy2_arm_J5_1\" reason=\"Adjacent\"\
+      />\n    <disable_collisions link1=\"dummy2_arm_J4_1\" link2=\"dummy2_arm_J6_1\" reason=\"Never\"/>\n    <disable_collisions link1=\"dummy2_arm_J5_1\" link2=\"dummy2_arm_J6_1\" reason=\"Adjacent\"\
+      />\n</robot>"
+    start_state_max_bounds_error: 0.1
