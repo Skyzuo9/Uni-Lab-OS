@@ -61,6 +61,14 @@ class BaseCommunicationClient(ABC):
         """
         pass
 
+    def publish_collision_event(self, event: dict) -> bool:
+        """发布仿真碰撞事件；未连接或不支持时返回False。"""
+        return False
+
+    def get_collision_workflow_context(self, asset_ids: list[str]) -> dict:
+        """按碰撞资产查询当前工作流上下文；无法唯一关联时返回空字典。"""
+        return {}
+
     @abstractmethod
     def publish_job_status(
         self, feedback_data: dict, job_id: str, status: str, return_info: Optional[dict] = None

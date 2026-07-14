@@ -48,6 +48,8 @@ _args_early.add_argument("--host", default="0.0.0.0")
 _args_early.add_argument("--port", type=int, default=9000)
 _args_early.add_argument("--path", default="/edge-sim/v1")
 _args_early.add_argument("--headless", action="store_true")
+_args_early.add_argument("--include-ground-contacts", action="store_true")
+_args_early.add_argument("--contact-publish-hz", type=float, default=20.0)
 CLI_ARGS, _ = _args_early.parse_known_args()
 
 simulation_app = SimulationApp({"headless": CLI_ARGS.headless})
@@ -71,6 +73,7 @@ except Exception:  # 旧版 (<=4.2)
     from omni.isaac.core.prims import XFormPrim as _XFormPrim
 
 from omni.physx import get_physx_simulation_interface
+from omni.physx.bindings._physx import ContactEventType
 
 # standalone 模式下显式启用 URDF 导入扩展，避免首次执行导入命令时扩展未加载
 try:
@@ -136,6 +139,7 @@ class SceneManager:
         # prim_path -> asset_id（碰撞回传时把裸 prim 路径映射回业务 asset_id）
         self.prim_to_asset = {}
         self._contact_sub = None
+        self._last_contact_publish = 0.0
 
     # ---------- world.create ----------
     def handle_world_create(self, env):
@@ -177,13 +181,18 @@ class SceneManager:
                 else:  # usd
                     add_reference_to_stage(usd_path=local, prim_path=prim_path)
                 self._apply_pose(prim_path, p.get("pose", {}))
-                self._enable_contact_report(prim_path)
                 self.assets[asset_id] = {"prim_path": prim_path, "kind": kind,
                                          "articulation": None, "initialized": False}
                 self.prim_to_asset[prim_path] = asset_id
                 if kind == "device":
                     self.device_prim[p.get("metadata", {}).get("id", asset_id)] = prim_path
                     self.device_prim[asset_id] = prim_path
+                self._enable_contact_report(prim_path)
+                # Importing a new articulation invalidates existing tensor views.
+                # Reset once after the stage and contact APIs are complete, before
+                # joint_state.stream lazily initializes the articulation wrapper.
+                if self.world is not None:
+                    self.world.reset()
         except Exception as e:
             err = {"code": "ASSET_LOAD_FAILED", "message": str(e), "retryable": False}
         self._send("asset.upsert.ack",
@@ -282,24 +291,72 @@ class SceneManager:
             self._on_contact)
 
     def _on_contact(self, contact_headers, contact_data):
+        now = time.monotonic()
         pairs = []
+        seen_pairs = set()
+        max_impulse = None
+        contact_points = []
+        point_count = 0
         for ch in contact_headers:
             try:
                 a = str(PhysicsSchemaTools.intToSdfPath(ch.actor0))
                 b = str(PhysicsSchemaTools.intToSdfPath(ch.actor1))
             except Exception:
                 continue
-            pairs.append({
-                "a_asset_id": self._prim_to_asset_id(a),
-                "b_asset_id": self._prim_to_asset_id(b),
-            })
+            if not CLI_ARGS.include_ground_contacts and (self._is_ground_path(a) or self._is_ground_path(b)):
+                continue
+            pair_key = tuple(sorted((a, b)))
+            if pair_key in seen_pairs:
+                continue
+            seen_pairs.add(pair_key)
+            a_asset = self._prim_to_asset_id(a)
+            b_asset = self._prim_to_asset_id(b)
+            phase_hint = self._contact_phase(getattr(ch, "type", None))
+            pairs.append(
+                {
+                    "a_asset_id": a_asset,
+                    "b_asset_id": b_asset,
+                    "a_link": self._prim_to_link_name(a),
+                    "b_link": self._prim_to_link_name(b),
+                    "a_prim_path": a,
+                    "b_prim_path": b,
+                    "event_phase": phase_hint,
+                }
+            )
+            summary = self._contact_summary(ch, contact_data)
+            point_count += summary["point_count"]
+            contact_points.extend(summary["points"])
+            impulse = summary["max_impulse"]
+            if impulse is not None:
+                max_impulse = impulse if max_impulse is None else max(max_impulse, impulse)
         if not pairs:
             return
+        has_transition = any(pair["event_phase"] != "update" for pair in pairs)
+        publish_hz = max(0.1, float(CLI_ARGS.contact_publish_hz))
+        if not has_transition and now - self._last_contact_publish < 1.0 / publish_hz:
+            return
+        self._last_contact_publish = now
+        if all(pair["a_asset_id"] == pair["b_asset_id"] for pair in pairs):
+            classification = "self_collision"
+        elif any(
+            "collision_fixture" in pair["a_asset_id"] or "collision_fixture" in pair["b_asset_id"]
+            for pair in pairs
+        ):
+            classification = "unexpected"
+        else:
+            classification = "unknown"
         payload = {
             "event_id": f"col_{uuid.uuid4().hex[:8]}",
             "severity": "warn",
             "sim_time_s": float(self.world.current_time) if self.world else 0.0,
+            "session_id": self.session_id,
+            "classification": classification,
             "pairs": pairs,
+            "contact": {
+                "point_count": point_count,
+                "max_impulse": max_impulse,
+                "points": contact_points[:8],
+            },
         }
         self.outbound_q.put(build_envelope("collision.event", payload, self.session_id, need_ack=False))
 
@@ -307,10 +364,57 @@ class SceneManager:
         # 精确命中优先；否则按前缀匹配（link 路径以资产 prim_path 开头）
         if prim_path in self.prim_to_asset:
             return self.prim_to_asset[prim_path]
-        for root, asset_id in self.prim_to_asset.items():
-            if prim_path == root or prim_path.startswith(root + "/"):
-                return asset_id
+        matches = [
+            (root, asset_id)
+            for root, asset_id in self.prim_to_asset.items()
+            if prim_path == root or prim_path.startswith(root + "/")
+        ]
+        if matches:
+            return max(matches, key=lambda item: len(item[0]))[1]
         return prim_path
+
+    def _prim_to_link_name(self, prim_path):
+        return str(prim_path).rstrip("/").rsplit("/", 1)[-1]
+
+    @staticmethod
+    def _contact_phase(event_type):
+        if event_type == ContactEventType.CONTACT_FOUND:
+            return "begin"
+        if event_type == ContactEventType.CONTACT_LOST:
+            return "end"
+        return "update"
+
+    @staticmethod
+    def _is_ground_path(prim_path):
+        value = str(prim_path).lower()
+        return "groundplane" in value or value.endswith("/ground")
+
+    @staticmethod
+    def _contact_summary(header, contact_data):
+        count = int(getattr(header, "num_contact_data", 0) or 0)
+        offset = int(getattr(header, "contact_data_offset", 0) or 0)
+        points = []
+        max_impulse = None
+        for data in list(contact_data)[offset:offset + count]:
+            position = getattr(data, "position", None)
+            if position is not None:
+                try:
+                    points.append({"x": float(position[0]), "y": float(position[1]), "z": float(position[2])})
+                except Exception:
+                    pass
+            impulse = getattr(data, "impulse", None)
+            if impulse is not None:
+                try:
+                    if hasattr(impulse, "GetLength"):
+                        value = float(impulse.GetLength())
+                    elif hasattr(impulse, "__len__"):
+                        value = float(np.linalg.norm(np.asarray(impulse, dtype=float)))
+                    else:
+                        value = abs(float(impulse))
+                    max_impulse = value if max_impulse is None else max(max_impulse, value)
+                except Exception:
+                    pass
+        return {"point_count": count, "points": points, "max_impulse": max_impulse}
 
     # ---------- 工具 ----------
     def _send(self, msg_type, payload, *, trace=None, need_ack=None, error=None):
@@ -337,12 +441,28 @@ class SceneManager:
 
     def _enable_contact_report(self, prim_path):
         stage = omni.usd.get_context().get_stage()
-        prim = stage.GetPrimAtPath(prim_path)
-        if prim and prim.IsValid():
+        applied = 0
+        root = str(prim_path).rstrip("/")
+        for prim in stage.Traverse():
+            current_path = str(prim.GetPath())
+            if current_path != root and not current_path.startswith(root + "/"):
+                continue
+            if not prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                continue
             try:
                 PhysxSchema.PhysxContactReportAPI.Apply(prim)
+                applied += 1
             except Exception:
                 pass
+        if applied == 0:
+            prim = stage.GetPrimAtPath(prim_path)
+            if prim and prim.IsValid():
+                try:
+                    PhysxSchema.PhysxContactReportAPI.Apply(prim)
+                    applied = 1
+                except Exception:
+                    pass
+        print(f"[bridge] contact report enabled on {applied} prim(s) under {prim_path}")
 
     def _get_articulation(self, prim_path):
         for a in self.assets.values():

@@ -86,6 +86,21 @@ class SimGatewayConfig:
     joint_command_topic = "/joint_states"
 
 
+class CollisionConfig:
+    enabled = True
+    cloud_reporting_enabled = False
+    jsonl_enabled = True
+    jsonl_path = ""
+    update_interval_ms = 1000
+    end_grace_ms = 2000
+    queue_size = 1024
+    min_severity = "info"
+    policy = "report"
+    ignore_ground = True
+    ignored_pairs = ""
+    marker_topic = "/unilabos/sim/collision_markers"
+
+
 def _update_config_from_module(module):
     for name, obj in globals().items():
         if isinstance(obj, type) and name.endswith("Config"):

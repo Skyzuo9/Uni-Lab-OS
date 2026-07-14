@@ -84,6 +84,7 @@ class JobInfo:
     device_action_key: str
     status: JobStatus
     start_time: float
+    node_id: str = ""
     last_update_time: float = field(default_factory=time.time)
     ready_timeout: Optional[float] = None  # READY状态的超时时间
     always_free: bool = False  # 是否为永久闲置动作(不受排队限制)
@@ -306,6 +307,32 @@ class DeviceActionManager:
                 if job.always_free and job.status == JobStatus.STARTED and job not in jobs:
                     jobs.append(job)
             return jobs
+
+    def get_active_job_snapshots(self) -> List[Dict[str, str]]:
+        """返回线程安全的活动任务只读快照，供碰撞等异步事件关联。"""
+        snapshots: List[Dict[str, str]] = []
+        for job in self.get_active_jobs():
+            if job.status != JobStatus.STARTED:
+                continue
+            snapshots.append(
+                {
+                    "task_id": job.task_id,
+                    "job_id": job.job_id,
+                    "node_id": job.node_id,
+                    "device_id": job.device_id,
+                    "action": job.action_name,
+                    "notebook_id": job.notebook_id,
+                }
+            )
+        return snapshots
+
+    def is_action_busy(self, device_action_key: str) -> bool:
+        """查询 device+action 锁状态；READY/STARTED 或存在排队任务均视为 busy。"""
+        with self.lock:
+            active = self.active_jobs.get(device_action_key)
+            if active is not None and active.status in (JobStatus.READY, JobStatus.STARTED):
+                return True
+            return bool(self.device_queues.get(device_action_key))
 
     def get_queued_jobs(self) -> List[JobInfo]:
         """获取所有排队中的任务"""
@@ -763,6 +790,8 @@ class MessageProcessor:
                 self._handle_pong(message_data)
             elif message_type == "query_action_state":
                 await self._handle_query_action_state(message_data)
+            elif message_type == "query_action_lock":
+                await self._handle_query_action_lock(message_data)
             elif message_type == "job_start":
                 await self._handle_job_start(message_data)
             elif message_type == "cancel_action" or message_type == "cancel_task":
@@ -815,6 +844,13 @@ class MessageProcessor:
             return False
         except Exception:
             return False
+
+    async def _handle_query_action_lock(self, data: Dict[str, Any]):
+        """服务端请求重新同步全部 device+action 锁状态。"""
+        if not self.websocket_client:
+            logger.warning("[MessageProcessor] query_action_lock received before websocket client setup")
+            return
+        self.websocket_client.report_all_action_locks()
 
     async def _handle_query_action_state(self, data: Dict[str, Any]):
         """处理query_action_state消息"""
@@ -893,6 +929,7 @@ class MessageProcessor:
             device_action_key=device_action_key,
             status=JobStatus.QUEUE,
             start_time=time.time(),
+            node_id=str(data.get("node_id") or ""),
             always_free=action_always_free,
         )
 
@@ -958,8 +995,8 @@ class MessageProcessor:
                         )
                     return
 
-            # 服务端对always_free动作可能跳过query_action_state直接发job_start，
-            # 此时job尚未注册，需要自动补注册
+            # 新版调度器在 device_lock 成功后直接下发 job_start，不再保证先发
+            # query_action_state；因此所有动作都必须在此处支持自动登记。
             existing_job = self.device_manager.get_job_info(req.job_id)
             if existing_job and existing_job.task_id != req.task_id:
                 logger.warning(
@@ -974,25 +1011,26 @@ class MessageProcessor:
                 action_name = req.action
                 device_action_key = f"/devices/{req.device_id}/{action_name}"
                 action_always_free = self._check_action_always_free(req.device_id, action_name)
-
-                if action_always_free:
-                    job_info = JobInfo(
-                        job_id=req.job_id,
-                        task_id=req.task_id,
-                        device_id=req.device_id,
-                        notebook_id=req.notebook_id,
-                        action_name=action_name,
-                        device_action_key=device_action_key,
-                        status=JobStatus.QUEUE,
-                        start_time=time.time(),
-                        always_free=True,
-                    )
-                    self.device_manager.add_queue_request(job_info)
-                    existing_job = job_info
-                    logger.info(f"[MessageProcessor] Job {job_log} always_free, auto-registered from direct job_start")
-                else:
-                    logger.error(f"[MessageProcessor] Job {job_log} not registered (missing query_action_state)")
+                job_info = JobInfo(
+                    job_id=req.job_id,
+                    task_id=req.task_id,
+                    device_id=req.device_id,
+                    notebook_id=req.notebook_id,
+                    action_name=action_name,
+                    device_action_key=device_action_key,
+                    status=JobStatus.QUEUE,
+                    start_time=time.time(),
+                    node_id=str(req.node_id or ""),
+                    always_free=action_always_free,
+                )
+                can_start_immediately = self.device_manager.add_queue_request(job_info)
+                existing_job = job_info
+                if not action_always_free and self.websocket_client:
+                    self.websocket_client.publish_action_lock(req.device_id, req.action, free=False)
+                if not can_start_immediately:
+                    logger.info(f"[MessageProcessor] Job {job_log} queued from direct job_start")
                     return
+                logger.info(f"[MessageProcessor] Job {job_log} auto-registered from direct job_start")
 
             if existing_job and req.notebook_id and not existing_job.notebook_id:
                 existing_job.notebook_id = req.notebook_id
@@ -1121,6 +1159,14 @@ class MessageProcessor:
             success = self.device_manager.cancel_job(job_id)
             if success:
                 logger.info(f"[MessageProcessor] Job {job_log} cancelled from queue/active list")
+                if (
+                    job_info is not None
+                    and self.websocket_client is not None
+                    and not self.device_manager.is_action_busy(job_info.device_action_key)
+                ):
+                    self.websocket_client.publish_action_lock(
+                        job_info.device_id, job_info.action_name, free=True
+                    )
 
                 # 通知QueueProcessor有队列更新
                 if self.queue_processor:
@@ -1151,6 +1197,12 @@ class MessageProcessor:
             cancelled_job_ids = self.device_manager.cancel_jobs_by_task_id(task_id)
             if cancelled_job_ids:
                 logger.info(f"[MessageProcessor] Cancelled {len(cancelled_job_ids)} jobs for task_id: {task_id}")
+                if self.websocket_client is not None:
+                    for job_info in jobs_to_cancel:
+                        if not self.device_manager.is_action_busy(job_info.device_action_key):
+                            self.websocket_client.publish_action_lock(
+                                job_info.device_id, job_info.action_name, free=True
+                            )
 
                 # 通知QueueProcessor有队列更新
                 if self.queue_processor:
@@ -1570,6 +1622,13 @@ class QueueProcessor:
 
         # 结束任务，获取下一个可执行的任务
         next_job = self.device_manager.end_job(job_id)
+        if (
+            next_job is None
+            and job_info is not None
+            and not job_info.always_free
+            and self.websocket_client is not None
+        ):
+            self.websocket_client.publish_action_lock(job_info.device_id, job_info.action_name, free=True)
 
         if next_job and self.message_processor.is_connected():
             # 通知下一个任务可以开始
@@ -1885,6 +1944,24 @@ class WebSocketClient(BaseCommunicationClient):
         }
         self.message_processor.send_message(message)
 
+    def publish_collision_event(self, event: dict) -> bool:
+        """发布仿真碰撞事件；发送走现有有界队列，不阻塞仿真回调。"""
+        if self.is_disabled or not self.is_connected():
+            return False
+        return self.message_processor.send_message({"action": "push_collision_event", "data": dict(event)})
+
+    def get_collision_workflow_context(self, asset_ids: list[str]) -> dict:
+        """仅在碰撞资产能唯一命中活动设备时返回任务上下文。"""
+        normalized_assets = {asset for asset in asset_ids if asset}
+        matches: List[Dict[str, str]] = []
+        for snapshot in self.device_manager.get_active_job_snapshots():
+            device_id = snapshot["device_id"]
+            if device_id in normalized_assets or any(device_id in asset for asset in normalized_assets):
+                matches.append(snapshot)
+        if len(matches) == 1:
+            return matches[0]
+        return {}
+
     def publish_job_status(
         self, feedback_data: dict, item: QueueItem, status: str, return_info: Optional[dict] = None
     ) -> None:
@@ -1975,11 +2052,55 @@ class WebSocketClient(BaseCommunicationClient):
         success = self.device_manager.cancel_job(job_id)
         if success:
             logger.info(f"[WebSocketClient] Job {job_log} cancelled successfully")
+            if job_info is not None and not self.device_manager.is_action_busy(job_info.device_action_key):
+                self.publish_action_lock(job_info.device_id, job_info.action_name, free=True)
         else:
             logger.warning(f"[WebSocketClient] Failed to cancel job {job_log}")
 
+    def publish_action_lock(self, device_id: str, action_name: str, free: bool) -> None:
+        """主动上报单个 device+action 的锁状态。"""
+        self.publish_action_locks([{"device_id": device_id, "action_name": action_name, "free": free}])
+
+    def publish_action_locks(self, locks: List[Dict[str, Any]]) -> None:
+        """批量上报 action 锁；断线期间不缓存中间态，重连后发送全量快照。"""
+        if self.is_disabled or not locks or not self.is_connected():
+            return
+        self.message_processor.send_message(
+            {
+                "action": "report_action_lock",
+                "data": {
+                    "locks": locks,
+                    "machine_name": BasicConfig.machine_name,
+                    "timestamp": time.time(),
+                },
+            }
+        )
+        logger.info(f"[WebSocketClient] report_action_lock sent for {len(locks)} action(s)")
+
+    def report_all_action_locks(self) -> None:
+        """从 HostNode 动作映射和本地队列生成完整锁快照。"""
+        if self.is_disabled or not self.is_connected():
+            return
+        host_node = HostNode.get_instance(0)
+        if host_node is None:
+            return
+        locks: List[Dict[str, Any]] = []
+        for device_id in host_node.devices_names:
+            for action_name in host_node._action_value_mappings.get(device_id, {}):
+                if action_name.startswith("_execute_driver_command"):
+                    continue
+                key = f"/devices/{device_id}/{action_name}"
+                locks.append(
+                    {
+                        "device_id": device_id,
+                        "action_name": action_name,
+                        "free": not self.device_manager.is_action_busy(key),
+                    }
+                )
+        self.publish_action_locks(locks)
+
     def publish_host_ready(self) -> None:
-        """发布host_node ready信号，包含设备和动作信息"""
+        """发布 host_node ready；动作可用性由 report_action_lock 单独表达。"""
         if self.is_disabled or not self.is_connected():
             logger.debug("[WebSocketClient] Not connected, cannot publish host ready signal")
             return
@@ -2005,17 +2126,6 @@ class WebSocketClient(BaseCommunicationClient):
                 )
                 is_online = device_key in host_node._online_devices
 
-                # 获取设备的动作信息
-                actions = {}
-                for action_id, client in host_node._action_clients.items():
-                    # action_id 格式: /namespace/device_id/action_name
-                    if device_id in action_id:
-                        action_name = action_id.split("/")[-1]
-                        actions[action_name] = {
-                            "action_path": action_id,
-                            "action_type": str(type(client).__name__),
-                        }
-
                 devices.append(
                     {
                         "device_id": device_id,
@@ -2023,7 +2133,6 @@ class WebSocketClient(BaseCommunicationClient):
                         "device_key": device_key,
                         "is_online": is_online,
                         "machine_name": host_node.device_machine_names.get(device_id, machine_name),
-                        "actions": actions,
                     }
                 )
 
@@ -2040,5 +2149,6 @@ class WebSocketClient(BaseCommunicationClient):
                 "devices": devices,
             },
         }
+        self.report_all_action_locks()
         self.message_processor.send_message(message)
         logger.info(f"[WebSocketClient] Host node ready signal published with {len(devices)} devices")

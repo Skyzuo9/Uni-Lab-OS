@@ -66,7 +66,7 @@ from unilabos.utils import logger
 from unilabos.utils.exception import DeviceClassInvalid
 from unilabos.utils.log import warning
 from unilabos.utils.type_check import serialize_result_info
-from unilabos.config.config import BasicConfig
+from unilabos.config.config import BasicConfig, CollisionConfig
 
 if TYPE_CHECKING:
     from unilabos.app.ws_client import QueueItem
@@ -286,6 +286,17 @@ class HostNode(BaseROS2DeviceNode):
             print_publish=False,
             resource_tracker=self._resource_tracker,  # host node并不是通过initialize 包一层传进来的
         )
+        self._collision_marker_publisher = None
+        try:
+            from visualization_msgs.msg import MarkerArray
+
+            self._collision_marker_publisher = self.create_publisher(
+                MarkerArray,
+                CollisionConfig.marker_topic,
+                10,
+            )
+        except ImportError:
+            self.lab_logger().debug("[Host Node] visualization_msgs不可用，跳过碰撞Marker发布器")
 
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射

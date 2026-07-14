@@ -36,7 +36,7 @@ if unilabos_dir not in sys.path:
 
 from unilabos.app.utils import cleanup_for_restart
 from unilabos.utils.banner_print import print_status, print_unilab_banner
-from unilabos.config.config import load_config, BasicConfig, HTTPConfig, SimGatewayConfig
+from unilabos.config.config import load_config, BasicConfig, CollisionConfig, HTTPConfig, SimGatewayConfig
 
 # Global restart flags (used by ws_client and web/server)
 _restart_requested: bool = False
@@ -325,6 +325,36 @@ def build_argparser():
         default="none",
         help="Unified simulation engine used to pick the virtual driver in sim/twin mode "
         "(none / isaac / gazebo / genesis / matterix / custom). Plan 08 v2.",
+    )
+    parser.add_argument(
+        "--sim_gateway",
+        action="store_true",
+        default=None,
+        help="Enable the Isaac unified WebSocket simulation gateway.",
+    )
+    parser.add_argument(
+        "--sim_gateway_endpoint",
+        type=str,
+        default=None,
+        help="Isaac simulation gateway endpoint (default from SimGatewayConfig).",
+    )
+    parser.add_argument(
+        "--collision_reporting",
+        action="store_true",
+        default=None,
+        help="Enable collision normalization, local audit log, and RViz markers.",
+    )
+    parser.add_argument(
+        "--collision_cloud_reporting",
+        action="store_true",
+        default=None,
+        help="Publish push_collision_event to the schedule WebSocket (backend support required).",
+    )
+    parser.add_argument(
+        "--collision_policy",
+        choices=["report", "cancel_job", "cancel_task", "pause_sim"],
+        default=None,
+        help="Collision response policy. Only report is implemented in the first release.",
     )
     parser.add_argument(
         "--sim_rate",
@@ -640,6 +670,22 @@ def main():
     print_status(f"当前工作目录为 {working_dir}", "info")
     if not check_mode:
         load_config_from_file(config_path)
+    if args_dict.get("sim_gateway") is not None:
+        SimGatewayConfig.enabled = bool(args_dict["sim_gateway"])
+    if args_dict.get("sim_gateway_endpoint"):
+        SimGatewayConfig.endpoint = str(args_dict["sim_gateway_endpoint"])
+    if args_dict.get("collision_reporting") is not None:
+        CollisionConfig.enabled = bool(args_dict["collision_reporting"])
+    if args_dict.get("collision_cloud_reporting") is not None:
+        CollisionConfig.cloud_reporting_enabled = bool(args_dict["collision_cloud_reporting"])
+    if args_dict.get("collision_policy"):
+        CollisionConfig.policy = str(args_dict["collision_policy"])
+    if CollisionConfig.policy != "report":
+        print_status(
+            f"碰撞策略 {CollisionConfig.policy!r} 尚未实现，当前版本将降级为 report-only。",
+            "warning",
+        )
+        CollisionConfig.policy = "report"
 
     # 根据配置重新设置日志级别
     from unilabos.utils.log import configure_logger, configure_comm_logger, logger
@@ -1039,6 +1085,8 @@ def main():
         args_dict["bridges"].append(http_client)
     # 获取通信客户端（仅支持WebSocket）
     isaac_gateway = None
+    collision_bridge = None
+    comm_client = None
     if BasicConfig.is_host_mode:
         comm_client = get_communication_client()
         if "websocket" in args_dict["app_bridges"]:
@@ -1048,6 +1096,8 @@ def main():
                 comm_client.stop()
                 if isaac_gateway is not None:
                     isaac_gateway.stop()
+                if collision_bridge is not None:
+                    collision_bridge.stop()
                 sys.exit(0)
 
             signal.signal(signal.SIGINT, _exit)
@@ -1063,11 +1113,41 @@ def main():
             isaac_gateway = IsaacSimGateway.from_config()
             isaac_gateway.start()
 
-            def _default_collision_handler(payload):
-                # 默认安全处理：结构化告警日志；可后续替换为停机/审计逻辑
-                print_status(f"[IsaacSim] 碰撞事件: {payload.get('pairs') or payload}", "warning")
+            if CollisionConfig.enabled:
+                from unilabos.sim.collision_bridge import (
+                    CollisionEventBridge,
+                    CommunicationCollisionSink,
+                    JsonlCollisionSink,
+                    LoggingCollisionSink,
+                )
 
-            isaac_gateway.add_collision_handler(_default_collision_handler)
+                collision_sinks = [LoggingCollisionSink()]
+                if CollisionConfig.jsonl_enabled:
+                    collision_jsonl_path = CollisionConfig.jsonl_path or os.path.join(
+                        BasicConfig.working_dir or "unilabos_data",
+                        "logs",
+                        "collision_events.jsonl",
+                    )
+                    collision_sinks.append(JsonlCollisionSink(collision_jsonl_path))
+                if CollisionConfig.cloud_reporting_enabled and comm_client is not None:
+                    collision_sinks.append(CommunicationCollisionSink(comm_client))
+
+                def _collision_workflow_context(pair):
+                    if comm_client is None:
+                        return {}
+                    return comm_client.get_collision_workflow_context(
+                        [pair.asset_a, pair.asset_b, pair.link_a, pair.link_b]
+                    )
+
+                collision_bridge = CollisionEventBridge(
+                    sinks=collision_sinks,
+                    workflow_context_provider=_collision_workflow_context,
+                    queue_size=CollisionConfig.queue_size,
+                    update_interval_ms=CollisionConfig.update_interval_ms,
+                    end_grace_ms=CollisionConfig.end_grace_ms,
+                )
+                collision_bridge.start()
+                isaac_gateway.add_collision_handler(collision_bridge.submit)
             print_status(f"IsaacSimGateway 已启动: {SimGatewayConfig.endpoint}", "info")
             # visual != disable 时改用 ResourceVisualization 的整场景 URDF（见下方 RV 构建后），
             # 避免给设备发占位 URI；仅在无可视化（无 RV）时走逐资源 sync 兜底。
@@ -1098,6 +1178,20 @@ def main():
                 scene_json=args_dict.get("scene_json"),
             )
             args_dict["resources_mesh_config"] = resource_visualization.resource_model
+            if collision_bridge is not None and enable_rviz:
+                from unilabos.ros.nodes.presets.host_node import HostNode
+                from unilabos.sim.collision_rviz_visualizer import RvizCollisionSink, UrdfVisualIndex
+
+                def _collision_marker_publisher():
+                    host_node = HostNode.get_instance(0)
+                    return getattr(host_node, "_collision_marker_publisher", None) if host_node is not None else None
+
+                collision_bridge.add_sink(
+                    RvizCollisionSink(
+                        publisher_provider=_collision_marker_publisher,
+                        visual_index=UrdfVisualIndex.from_urdf(resource_visualization.urdf_str),
+                    )
+                )
             # 把整场景展开后的 URDF 作为单个 full_dev 设备发给 Isaac Sim
             if isaac_gateway is not None:
                 try:
@@ -1141,6 +1235,8 @@ def main():
                 print_status("[Main] Restart requested, cleaning up...", "info")
                 if isaac_gateway is not None:
                     isaac_gateway.stop()
+                if collision_bridge is not None:
+                    collision_bridge.stop()
                 cleanup_for_restart()
                 return
     else:
@@ -1155,6 +1251,8 @@ def main():
             print_status("[Main] Restart requested, cleaning up...", "info")
             if isaac_gateway is not None:
                 isaac_gateway.stop()
+            if collision_bridge is not None:
+                collision_bridge.stop()
             cleanup_for_restart()
             os._exit(RESTART_EXIT_CODE)
 

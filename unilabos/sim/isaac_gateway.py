@@ -246,6 +246,7 @@ class IsaacSimGateway:
         import hashlib
         import tempfile
         import pathlib
+        import os
 
         if not isinstance(urdf_str, str) or not urdf_str.strip():
             logger.warning("[IsaacGateway] upsert_scene_urdf skipped: empty urdf_str")
@@ -297,7 +298,25 @@ class IsaacSimGateway:
             _stats["sanitized"] += 1
             return 'filename="file://' + dest + '"'
 
-        normalized = re.sub(r'filename="file://([^"]+)"', _rewrite, urdf_str)
+        def _rewrite_package(m: "re.Match") -> str:
+            package_name, relative_path = m.group(1), m.group(2)
+            for prefix in os.environ.get("AMENT_PREFIX_PATH", "").split(os.pathsep):
+                if not prefix:
+                    continue
+                candidate = pathlib.Path(prefix) / "share" / package_name / relative_path
+                if candidate.exists():
+                    return f'filename="{candidate.resolve().as_uri()}"'
+            try:
+                from ament_index_python.packages import get_package_share_directory
+
+                candidate = pathlib.Path(get_package_share_directory(package_name)) / relative_path
+                return f'filename="{candidate.resolve().as_uri()}"'
+            except Exception:
+                logger.warning(f"[IsaacGateway] unresolved package mesh: package://{package_name}/{relative_path}")
+                return m.group(0)
+
+        normalized = re.sub(r'filename="package://([^/"]+)/([^"]+)"', _rewrite_package, urdf_str)
+        normalized = re.sub(r'filename="file://([^"]+)"', _rewrite, normalized)
         if _stats["sanitized"]:
             logger.info(
                 f"[IsaacGateway] scene urdf mesh sanitized: {_stats['sanitized']}/{_stats['total']} "

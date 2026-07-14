@@ -152,6 +152,18 @@ class ResourceVisualization:
                         # [AI] 缺本地 macro_device.xacro（OSS-only 的 layout 占位设备）时用通用占位盒代替，
                         # 避免 rviz xacro include 崩溃；cloud 不受影响（仍按注册表 OSS model 渲染）。
                         mesh_name = model_config['mesh']
+                        local_ament_prefix = os.path.join(
+                            str(self.mesh_path),
+                            "devices",
+                            mesh_name,
+                            ".ament_prefix",
+                        )
+                        if os.path.isdir(local_ament_prefix):
+                            current_prefixes = os.environ.get("AMENT_PREFIX_PATH", "").split(os.pathsep)
+                            if local_ament_prefix not in current_prefixes:
+                                os.environ["AMENT_PREFIX_PATH"] = os.pathsep.join(
+                                    [local_ament_prefix] + [p for p in current_prefixes if p]
+                                )
                         if not os.path.exists(os.path.join(str(self.mesh_path), "devices", mesh_name, "macro_device.xacro")):
                             mesh_name = "placeholder_device"
                         if mesh_name not in included_device_meshes:
