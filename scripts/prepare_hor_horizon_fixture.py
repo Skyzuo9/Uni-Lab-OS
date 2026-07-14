@@ -120,7 +120,7 @@ def build_fixture(source: Path, output: Path) -> dict:
             "  <version>0.1.0</version>\n"
             "  <description>HOR Horizon collision development model.</description>\n"
             "  <maintainer email=\"noreply@example.com\">Uni-Lab</maintainer>\n"
-            "  <license>Proprietary</license>\n"
+            "  <license>BSD</license>\n"
             "</package>\n"
         ),
         encoding="utf-8",
@@ -128,11 +128,11 @@ def build_fixture(source: Path, output: Path) -> dict:
     ament_prefix = _create_ament_prefix(output)
 
     report = {
-        "source_urdf": str(urdf_files[0]),
-        "output_xacro": str(xacro_path),
+        "source_urdf": urdf_files[0].name,
+        "output_xacro": xacro_path.name,
         "links": len(links),
         "joints": len(joints),
-        "ament_prefix": str(ament_prefix),
+        "ament_prefix": str(ament_prefix.relative_to(output)),
         "mesh_report": mesh_report,
     }
     (output / "fixture_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -150,7 +150,8 @@ def _create_ament_prefix(output: Path) -> Path:
             shutil.rmtree(package_link)
         else:
             package_link.unlink()
-    package_link.symlink_to(output.resolve(), target_is_directory=True)
+    # 从 <output>/.ament_prefix/share/<package> 指回 <output>，保持跨机器可搬运。
+    package_link.symlink_to(Path("../.."), target_is_directory=True)
     return prefix
 
 

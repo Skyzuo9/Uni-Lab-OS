@@ -10,7 +10,9 @@
 
 ## 1. 准备 HOR 模型
 
-原始 SolidWorks 导出包不提交仓库。首次在机器上执行：
+仓库已包含 HOR visual STL、凸包 collision STL、xacro 和便携 ament 索引，正常克隆后可直接运行。
+
+只有需要从原始 SolidWorks 导出包重新生成模型时才执行：
 
 ```bash
 cd /home/ubuntu/lab4090/projects/isaac-collision-edge-report
@@ -144,5 +146,5 @@ conda run --no-capture-output -n unilab env PYTHONPATH=. \
 
 - RViz 是显示层；碰撞事实来自 Isaac PhysX。
 - 目前 Go 后端尚不消费 `push_collision_event`，因此 Web 页面不会显示碰撞。
-- HOR 原始 STL 的公开分发许可尚未确认，不应上传公开仓库。
+- HOR 模型按已确认的 BSD 授权随仓库分发。
 - `run_collision_demo` 是测试动作，不代表真实 HOR 硬件通信协议。

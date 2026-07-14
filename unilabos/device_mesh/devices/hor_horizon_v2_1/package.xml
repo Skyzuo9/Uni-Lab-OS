@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>hor_horizon_v2_1_description</name>
+  <version>0.1.0</version>
+  <description>HOR Horizon collision development model.</description>
+  <maintainer email="noreply@example.com">Uni-Lab</maintainer>
+  <license>BSD</license>
+</package>

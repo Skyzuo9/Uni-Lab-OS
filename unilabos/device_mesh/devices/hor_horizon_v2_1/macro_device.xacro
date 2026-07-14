@@ -1,0 +1,291 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hor_horizon_v2_1">
+  <xacro:macro name="hor_horizon_v2_1" params="parent_link mesh_path device_name x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0">
+    <link name="${device_name}base_link">
+      <inertial>
+        <origin xyz="0.227480860105998 0.0391494766939413 0.100931343380471" rpy="0 0 0" />
+        <mass value="11.466237886278" />
+        <inertia ixx="0.2071492847089" ixy="0.0015284154799316" ixz="-0.0101229368082016" iyy="0.469474260913639" iyz="0.000412106322545097" izz="0.657882005729053" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/base_link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/base_link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}gate_Link">
+      <inertial>
+        <origin xyz="0.0339999999999956 0.0074720161233684 -0.162338924504075" rpy="0 0 0" />
+        <mass value="1.00637486752362" />
+        <inertia ixx="0.00854777241876942" ixy="-1.1757856351663E-16" ixz="1.8487509977826E-14" iyy="0.0407392681087321" iyz="4.90047106405514E-08" izz="0.0321957418150565" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/gate_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="1 1 1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/gate_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}arm_Link">
+      <inertial>
+        <origin xyz="-1.22124532708767E-15 0.0191449983644234 0.32458312927179" rpy="0 0 0" />
+        <mass value="14.2996662259675" />
+        <inertia ixx="0.542562904622312" ixy="-3.79432968558128E-16" ixz="4.57657787562106E-15" iyy="0.545529331190894" iyz="2.82493715834788E-16" izz="0.0510149311304579" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/arm_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.866666666666667 0.866666666666667 0.890196078431372 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/arm_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}arm0_Link">
+      <inertial>
+        <origin xyz="0 -0.104927614324143 0.29419436001578" rpy="0 0 0" />
+        <mass value="0.828629227096426" />
+        <inertia ixx="0.0011970359878711" ixy="-5.92431580254796E-20" ixz="2.68096252271724E-20" iyy="0.00108355785790041" iyz="-1.88092240278816E-06" izz="0.00160914803816436" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/arm0_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.866666666666667 0.866666666666667 0.890196078431372 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/arm0_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}arm1_Link">
+      <inertial>
+        <origin xyz="5.55111512312578E-17 -0.1 -0.0325" rpy="0 0 0" />
+        <mass value="2.04764861029349" />
+        <inertia ixx="0.0150150059448827" ixy="-4.59299710594852E-20" ixz="2.77185773113006E-21" iyy="0.00262980501315444" iyz="8.23044709490264E-19" izz="0.0162030186138787" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/arm1_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.866666666666667 0.866666666666667 0.890196078431372 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/arm1_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}arm2_Link">
+      <inertial>
+        <origin xyz="0 -0.0861257730831339 -0.0895" rpy="0 0 0" />
+        <mass value="1.19870202871082" />
+        <inertia ixx="0.00780783223764424" ixy="9.6007060556915E-20" ixz="3.81537057540084E-20" iyy="0.00109642607170081" iyz="-1.81359426538915E-19" izz="0.00849973845100576" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/arm2_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.866666666666667 0.866666666666667 0.890196078431372 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/arm2_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}arm3_Link">
+      <inertial>
+        <origin xyz="4.04153886273129E-05 -0.0370021736597003 -0.0200103115896786" rpy="0 0 0" />
+        <mass value="0.478829655652756" />
+        <inertia ixx="0.000634299093384671" ixy="9.58659594043993E-07" ixz="-7.09608547976509E-07" iyy="0.000544926519465987" iyz="-9.87146820171998E-06" izz="0.00102271792129809" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/arm3_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="1 1 1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/arm3_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}left_Link">
+      <inertial>
+        <origin xyz="-0.00694570004258147 -0.0439451901128946 -0.018690613513089" rpy="0 0 0" />
+        <mass value="0.00630771825865564" />
+        <inertia ixx="7.32374806337997E-06" ixy="1.56888394626074E-14" ixz="8.73756695008646E-10" iyy="1.27421634571815E-06" iyz="-2.55556289270195E-06" izz="6.10512329479891E-06" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/left_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.772549019607843 0.752941176470588 0.733333333333333 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/left_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}right_Link">
+      <inertial>
+        <origin xyz="0.00694570004255279 -0.0439451892172145 -0.0186906135134016" rpy="0 0 0" />
+        <mass value="0.00630771825865564" />
+        <inertia ixx="7.32374806337997E-06" ixy="1.56888402494729E-14" ixz="-8.73756694970214E-10" iyy="1.27421634571815E-06" iyz="-2.55556287906944E-06" izz="6.10512329479891E-06" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/right_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.772549019607843 0.752941176470588 0.733333333333333 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/right_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${device_name}box_Link">
+      <inertial>
+        <origin xyz="0.296251227379247 0.0153707831925897 0.365381679500492" rpy="0 0 0" />
+        <mass value="19.7157893713018" />
+        <inertia ixx="0.596135693521402" ixy="0.00130336765923091" ixz="-0.000270199680861781" iyy="0.611959155424377" iyz="0.00035221046669727" izz="0.797008820731416" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/visual/box_Link.STL" />
+        </geometry>
+        <material name="">
+          <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://hor_horizon_v2_1_description/meshes/collision/box_Link.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${device_name}gate_joint" type="revolute">
+      <origin xyz="-0.239 0.3345 0.421250000000017" rpy="0 0 3.14159265358979" />
+      <parent link="${device_name}base_link" />
+      <child link="${device_name}gate_Link" />
+      <axis xyz="-1 0 0" />
+      <limit lower="0" upper="1.57" effort="20" velocity="1.0" />
+    </joint>
+    <joint name="${device_name}arm_joint" type="fixed">
+      <origin xyz="0.37 -0.21475 0.1235" rpy="0 0 3.14159265358979" />
+      <parent link="${device_name}base_link" />
+      <child link="${device_name}arm_Link" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <joint name="${device_name}arm0_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${device_name}arm_Link" />
+      <child link="${device_name}arm0_Link" />
+      <axis xyz="0 0.000746268448911689 0.999999721541662" />
+      <limit lower="0" upper="0.43" effort="100" velocity="0.2" />
+    </joint>
+    <joint name="${device_name}arm1_joint" type="revolute">
+      <origin xyz="0 -0.11515 0.259343846937787" rpy="0 0 0" />
+      <parent link="${device_name}arm0_Link" />
+      <child link="${device_name}arm1_Link" />
+      <axis xyz="0 0 -1" />
+      <limit lower="-2" upper="2" effort="20" velocity="1.0" />
+    </joint>
+    <joint name="${device_name}arm2_joint" type="revolute">
+      <origin xyz="0 -0.2 0" rpy="0 0 0" />
+      <parent link="${device_name}arm1_Link" />
+      <child link="${device_name}arm2_Link" />
+      <axis xyz="0 0 1" />
+      <limit lower="-2" upper="2" effort="20" velocity="1.0" />
+    </joint>
+    <joint name="${device_name}arm3_joint" type="revolute">
+      <origin xyz="0 -0.2 -0.116" rpy="0 0 0" />
+      <parent link="${device_name}arm2_Link" />
+      <child link="${device_name}arm3_Link" />
+      <axis xyz="0 0 1" />
+      <limit lower="-2" upper="2" effort="20" velocity="1.0" />
+    </joint>
+    <joint name="${device_name}left_joint" type="prismatic">
+      <origin xyz="-0.0360987090713536 -0.084 -0.0288000000002171" rpy="0 0 0" />
+      <parent link="${device_name}arm3_Link" />
+      <child link="${device_name}left_Link" />
+      <axis xyz="1 0 0" />
+      <limit lower="-0.025" upper="0" effort="100" velocity="0.2" />
+    </joint>
+    <joint name="${device_name}right_joint" type="prismatic">
+      <origin xyz="0.036098709071382 -0.084 -0.0287999999999045" rpy="0 0 0" />
+      <parent link="${device_name}arm3_Link" />
+      <child link="${device_name}right_Link" />
+      <axis xyz="1 0 0" />
+      <limit lower="0" upper="0.025" effort="100" velocity="0.2" />
+    </joint>
+    <joint name="${device_name}box_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 -3.1416" />
+      <parent link="${device_name}base_link" />
+      <child link="${device_name}box_Link" />
+      <axis xyz="0 0 0" />
+    </joint>
+    <joint name="${device_name}world_joint" type="fixed">
+      <parent link="${parent_link}" />
+      <child link="${device_name}base_link" />
+      <origin xyz="${x} ${y} ${z}" rpy="${rx} ${ry} ${r}" />
+    </joint>
+  </xacro:macro>
+</robot>
